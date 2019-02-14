@@ -12,6 +12,14 @@ choice
 		be available for selection.  Use ARCH_BOARD_CUSTOM to create a new
 		board configuration.
 
+config ARCH_BOARD_INTELLIFLIGHT_V1
+	bool "IntelliFlight v1 dev board"
+	depends on ARCH_CHIP_STM32F765VG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		IntelliFlight v1 development board featuring the STM32F765VG MCU. 
 config ARCH_BOARD_AMBER
 	bool "Amber Web Server"
 	depends on ARCH_CHIP_ATMEGA128
@@ -1773,6 +1781,7 @@ endif #ARCH_BOARD_CUSTOM
 
 config ARCH_BOARD
 	string
+	default "intelliflight-v1"         if ARCH_BOARD_INTELLIFLIGHT_V1
 	default "amber"                    if ARCH_BOARD_AMBER
 	default "arduino-mega2560"         if ARCH_BOARD_ARDUINO_MEGA2560
 	default "arduino-due"              if ARCH_BOARD_ARDUINO_DUE
@@ -1975,7 +1984,9 @@ config ARCH_IRQBUTTONS
 
 comment "Board-Specific Options"
 
-
+if ARCH_BOARD_INTELLIFLIGHT_V1
+source "configs/intelliflight-v1/Kconfig"
+endif
 if ARCH_BOARD_AMBER
 source "configs/amber/Kconfig"
 endif
