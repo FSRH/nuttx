@@ -336,7 +336,7 @@ static inline void nx_start_application(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_INITTHREAD
+#ifdef CONFIG_BOARD_INITIALIZE
 static int nx_start_task(int argc, FAR char **argv)
 {
   /* Do the board/application initialization and exit */
@@ -365,7 +365,7 @@ static int nx_start_task(int argc, FAR char **argv)
 
 static inline void nx_create_initthread(void)
 {
-#ifdef CONFIG_BOARD_INITTHREAD
+#ifdef CONFIG_BOARD_INITIALIZE
   int pid;
 
   /* Do the board/application initialization on a separate thread of
@@ -381,7 +381,6 @@ static inline void nx_create_initthread(void)
   /* Do the board/application initialization on this thread of execution. */
 
   nx_start_application();
-
 #endif
 }
 

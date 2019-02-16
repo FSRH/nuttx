@@ -154,7 +154,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
       for (; ; )
         {
           c = fmt_char(fmt);
-          if (!c)
+          if (c == '\0')
             {
               goto ret;
             }
@@ -174,7 +174,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
       for (flags = 0; !(flags & FL_LONG);       /* 'll' will detect as error */
            c = fmt_char(fmt))
         {
-          if (c && strchr(" +-.0123456789h", c))
+          if (c != '\0' && strchr(" +-.0123456789h", c) != NULL)
             {
               continue;
             }
@@ -230,6 +230,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
       if (c == 'd' || c == 'i')
         {
           long x = (flags & FL_LONG) ? va_arg(ap, long) : va_arg(ap, int);
+
           flags &= ~FL_ALT;
           if (x < 0)
             {
@@ -287,15 +288,15 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
       /* Integer number output.  */
 
-      if (flags & FL_NEGATIVE)
+      if ((flags & FL_NEGATIVE) != 0)
         {
           putc('-', stream);
         }
 
-      if ((flags & FL_ALT) && (buf[c - 1] != '0'))
+      if ((flags & FL_ALT) != 0 && buf[c - 1] != '0')
         {
           putc('0', stream);
-          if (flags & FL_ALTHEX)
+          if ((flags & FL_ALTHEX) != 0)
             {
 #  if  FL_ALTLWR != 'x' - 'X'
 #    error
@@ -326,7 +327,11 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
   int prec;
   union
   {
+#  ifdef CONFIG_LIBC_LONG_LONG
+    unsigned char __buf[22];  /* Size for -1 in octal, without '\0' */
+#  else
     unsigned char __buf[11];  /* Size for -1 in octal, without '\0' */
+#  endif
 #  if PRINTF_LEVEL >= PRINTF_FLT
     struct dtoa_s __dtoa;
 #  endif
@@ -344,7 +349,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
       for (; ; )
         {
           c = fmt_char(fmt);
-          if (!c)
+          if (c == '\0')
             {
               goto ret;
             }
@@ -399,7 +404,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
               if (c >= '0' && c <= '9')
                 {
                   c -= '0';
-                  if (flags & FL_PREC)
+                  if ((flags & FL_PREC) != 0)
                     {
                       prec = 10 * prec + c;
                       continue;
@@ -412,7 +417,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
               if (c == '*')
                 {
-                  if (flags & FL_PREC)
+                  if ((flags & FL_PREC) != 0)
                     {
                       prec = va_arg(ap, int);
                       if (prec < 0)
@@ -436,7 +441,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
               if (c == '.')
                 {
-                  if (flags & FL_PREC)
+                  if ((flags & FL_PREC) != 0)
                     {
                       goto ret;
                     }
@@ -448,7 +453,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
           if (c == 'l')
             {
-              if (flags & FL_LONG)
+              if ((flags & FL_LONG) != 0)
                 {
                   flags |= FL_LONGLONG;
                 }
@@ -495,7 +500,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
         flt_oper:
           ndigs = 0;
-          if (!(flags & FL_PREC))
+          if ((flags & FL_PREC) == 0)
             {
               prec = 6;
             }
@@ -533,11 +538,11 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
             {
               sign = '-';
             }
-          else if (flags & FL_PLUS)
+          else if ((flags & FL_PLUS) != 0)
             {
               sign = '+';
             }
-          else if (flags & FL_SPACE)
+          else if ((flags & FL_SPACE) != 0)
             {
               sign = ' ';
             }
@@ -550,7 +555,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
               if (width > ndigs)
                 {
                   width -= ndigs;
-                  if (!(flags & FL_LPAD))
+                  if ((flags & FL_LPAD) == 0)
                     {
                       do
                         {
@@ -580,7 +585,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 #    endif
               while ((ndigs = *p) != 0)
                 {
-                  if (flags & FL_FLTUPP)
+                  if ((flags & FL_FLTUPP) != 0)
                     {
                       ndigs += 'I' - 'i';
                     }
@@ -592,7 +597,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
               goto tail;
             }
 
-          if (!(flags & (FL_FLTEXP | FL_FLTFIX)))
+          if ((flags & (FL_FLTEXP | FL_FLTFIX)) == 0)
             {
               /* 'g(G)' format */
 
@@ -628,7 +633,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
           /* Conversion result length, width := free space length */
 
-          if (flags & FL_FLTFIX)
+          if ((flags & FL_FLTFIX) != 0)
             {
               n = (exp > 0 ? exp + 1 : 1);
             }
@@ -637,16 +642,16 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
               n = 5;              /* 1e+00 */
             }
 
-          if (sign)
+          if (sign != 0)
             {
               n += 1;
             }
 
-          if (prec)
+          if (prec != 0)
             {
               n += prec + 1;
             }
-          else if (flags & FL_ALT)
+          else if ((flags & FL_ALT) != 0)
             {
               n += 1;
             }
@@ -655,7 +660,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
           /* Output before first digit */
 
-          if (!(flags & (FL_LPAD | FL_ZFILL)))
+          if ((flags & (FL_LPAD | FL_ZFILL)) == 0)
             {
               while (width)
                 {
@@ -664,12 +669,12 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
                 }
             }
 
-          if (sign)
+          if (sign != 0)
             {
               putc(sign, stream);
             }
 
-          if (!(flags & FL_LPAD))
+          if ((flags & FL_LPAD) == 0)
             {
               while (width)
                 {
@@ -678,7 +683,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
                 }
             }
 
-          if (flags & FL_FLTFIX)
+          if ((flags & FL_FLTFIX) != 0)
             {
               /* 'f' format */
 
@@ -714,7 +719,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
                   if (--n < -prec)
                     {
-                      if ((flags & FL_ALT) && n == -1)
+                      if ((flags & FL_ALT) != 0 && n == -1)
                         {
                           putc('.', stream);
                         }
@@ -749,12 +754,15 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
               putc(_dtoa.digits[0], stream);
               if (prec > 0)
                 {
+                  uint8_t pos;
+
                   putc('.', stream);
-                  uint8_t pos = 1;
                   for (pos = 1; pos < 1 + prec; pos++)
-                    putc(pos < ndigs ? _dtoa.digits[pos] : '0', stream);
+                    {
+                      putc(pos < ndigs ? _dtoa.digits[pos] : '0', stream);
+                    }
                 }
-              else if (flags & FL_ALT)
+              else if ((flags & FL_ALT) != 0)
                 {
                   putc('.', stream);
                 }
@@ -807,7 +815,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
           size = strnlen(pnt, (flags & FL_PREC) ? prec : ~0);
 
         str_lpad:
-          if (!(flags & FL_LPAD))
+          if ((flags & FL_LPAD) == 0)
             {
               while (size < width)
                 {
@@ -819,7 +827,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
           while (size)
             {
               putc(*pnt++, stream);
-              if (width)
+              if (width != 0)
                 {
                   width -= 1;
                 }
@@ -832,16 +840,25 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
       if (c == 'd' || c == 'i')
         {
+#ifndef CONFIG_LIBC_LONG_LONG
           long x;
+#else
+          long long x;
 
-          if (flags & FL_LONG)
+          if ((flags & FL_LONGLONG) != 0)
+            {
+              x = va_arg(ap, long long);
+            }
+          else
+#endif
+          if ((flags & FL_LONG) != 0)
             {
               x = va_arg(ap, long);
             }
           else
             {
               x = va_arg(ap, int);
-              if (flags & FL_SHORT)
+              if ((flags & FL_SHORT) != 0)
                 {
                   x = (short)x;
                 }
@@ -854,7 +871,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
               flags |= FL_NEGATIVE;
             }
 
-          if ((flags & FL_PREC) && prec == 0 && x == 0)
+          if ((flags & FL_PREC) != 0 && prec == 0 && x == 0)
             {
               c = 0;
             }
@@ -866,17 +883,28 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
       else
         {
           int base;
+#ifndef CONFIG_LIBC_LONG_LONG
           unsigned long x;
+#else
+          unsigned long long x;
 
-          if (flags & FL_LONG)
+          if ((flags & FL_LONGLONG) != 0)
+            {
+              x = va_arg(ap, unsigned long long);
+            }
+          else
+#endif
+          if ((flags & FL_LONG) != 0)
             {
               x = va_arg(ap, unsigned long);
             }
           else
             {
               x = va_arg(ap, unsigned int);
-              if (flags & FL_SHORT)
-                x = (unsigned short)x;
+              if ((flags & FL_SHORT) != 0)
+                {
+                  x = (unsigned short)x;
+                }
             }
 
           flags &= ~(FL_PLUS | FL_SPACE);
@@ -898,14 +926,20 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
               /* no break */
 
             case 'x':
-              if (flags & FL_ALT)
-                flags |= FL_ALTHEX;
+              if ((flags & FL_ALT) != 0)
+                {
+                  flags |= FL_ALTHEX;
+                }
+
               base = 16;
               break;
 
             case 'X':
-              if (flags & FL_ALT)
-                flags |= (FL_ALTHEX | FL_ALTUPP);
+              if ((flags & FL_ALT) != 0)
+                {
+                  flags |= (FL_ALTHEX | FL_ALTUPP);
+                }
+
               base = 16 | XTOA_UPPER;
               break;
 
@@ -915,13 +949,13 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
               continue;
             }
 
-          if ((flags & FL_PREC) && prec == 0 && x == 0)
+          if ((flags & FL_PREC) != 0 && prec == 0 && x == 0)
             {
               c = 0;
             }
           else
             {
-            c = __ultoa_invert(x, (char *)buf, base) - (char *)buf;
+              c = __ultoa_invert(x, (char *)buf, base) - (char *)buf;
             }
 
           flags &= ~FL_NEGATIVE;
@@ -929,20 +963,20 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
       len = c;
 
-      if (flags & FL_PREC)
+      if ((flags & FL_PREC) != 0)
         {
           flags &= ~FL_ZFILL;
           if (len < prec)
             {
               len = prec;
-              if ((flags & FL_ALT) && !(flags & FL_ALTHEX))
+              if ((flags & FL_ALT) != 0 && (flags & FL_ALTHEX) == 0)
                 {
                   flags &= ~FL_ALT;
                 }
             }
         }
 
-      if (flags & FL_ALT)
+      if ((flags & FL_ALT) != 0)
         {
           if (buf[c - 1] == '0')
             {
@@ -951,20 +985,20 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
           else
             {
               len += 1;
-              if (flags & FL_ALTHEX)
+              if ((flags & FL_ALTHEX) != 0)
                 {
                   len += 1;
                 }
             }
         }
-      else if (flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE))
+      else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
         {
           len += 1;
         }
 
-      if (!(flags & FL_LPAD))
+      if ((flags & FL_LPAD) == 0)
         {
-          if (flags & FL_ZFILL)
+          if ((flags & FL_ZFILL) != 0)
             {
               prec = c;
               if (len < width)
@@ -983,23 +1017,23 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
       width = (len < width) ? width - len : 0;
 
-      if (flags & FL_ALT)
+      if ((flags & FL_ALT) != 0)
         {
           putc('0', stream);
-          if (flags & FL_ALTHEX)
+          if ((flags & FL_ALTHEX) != 0)
             {
               putc(flags & FL_ALTUPP ? 'X' : 'x', stream);
             }
         }
-      else if (flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE))
+      else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
         {
           unsigned char z = ' ';
-          if (flags & FL_PLUS)
+          if ((flags & FL_PLUS) != 0)
             {
               z = '+';
             }
 
-          if (flags & FL_NEGATIVE)
+          if ((flags & FL_NEGATIVE) != 0)
             {
               z = '-';
             }

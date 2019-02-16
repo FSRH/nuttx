@@ -108,7 +108,7 @@ static void sx127x_chip_reset(void)
   /* Configure reset as output */
 
   stm32_configgpio(GPIO_SX127X_RESET | GPIO_OUTPUT | GPIO_SPEED_HIGH |
-                   GPIO_OUTPUT_SET);
+                   GPIO_OUTPUT_CLEAR);
 
   /* Set pin to zero */
 
