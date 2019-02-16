@@ -327,75 +327,145 @@
 
 /* Alternate function pin selections ************************************************/
 
-/* USART6:
+/* SPI1: ICM20689 Gyro
  *
- * These configurations assume that you are using a standard Arduio RS-232 shield
- * with the serial interface with RX on pin D0 and TX on pin D1:
+ *   FUNCTION  GPIO
+ *   --------- -----
+ *   SPI1_SCK  PA5
+ *   SPI1_MISO PA6
+ *   SPI1_MOSI PA7
  *
- *   -------- ---------------
- *               STM32F7
- *   ARDUINO  FUNCTION  GPIO
- *   -- ----- --------- -----
- *   DO RX    USART6_RX PC7
- *   D1 TX    USART6_TX PC6
- *   -- ----- --------- -----
+ *   NOTE:
+ *   	NSS is not necessary, since there is only one device
  */
 
-#define GPIO_USART6_RX GPIO_USART6_RX_1
-#define GPIO_USART6_TX GPIO_USART6_TX_1
+#define GPIO_SPI1_SCK GPIO_SPI1_SCK_1
+#define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
+#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
 
-/* USART1:
- * USART1 is connected to the "Virtual Com Port" lines
- * of the ST-LINK controller.
+/* SPI2:
  *
- *   -------- ---------------
- *               STM32F7
- *   SIGNAME  FUNCTION  GPIO
- *   -- ----- --------- -----
- *   VCP_RX   USART1_RX PA10
- *   VCP_TX   USART1_TX PA9
- *   -- ----- --------- -----
+ *   FUNCTION  GPIO
+ *   --------- -----
+ *   SPI2_SCK  PD3
+ *   SPI2_MISO PB14
+ *   SPI2_MOSI PB15
+ *
+ *   NOTE:
+ *   	Use only as master; there is no NSS
+ *
+ *
+ * SPI2 DMA:
+ *   DMAMAP_SPI2_RX = Channel 0, Stream 3
+ *   DMAMAP_SPI2_TX = Channel 0, Stream 4
+ *
  */
 
-#define GPIO_USART1_RX GPIO_USART1_RX_1
-#define GPIO_USART1_TX GPIO_USART1_TX_1
+#define GPIO_SPI2_SCK GPIO_SPI2_SCK_4
+#define GPIO_SPI2_MISO GPIO_SPI2_MISO_1
+#define GPIO_SPI2_MOSI GPIO_SPI2_MOSI_1
 
-/* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
+/* SPI3:
  *
- *   STM32 F7 BOARD        LAN8742A
- *   GPIO     SIGNAL       PIN NAME
- *   -------- ------------ -------------
- *   PG11     RMII_TX_EN   TXEN
- *   PG13     RMII_TXD0    TXD0
- *   PG14     RMII_TXD1    TXD1
- *   PC4      RMII_RXD0    RXD0/MODE0
- *   PC5      RMII_RXD1    RXD1/MODE1
- *   PD5      RMII_RXER    RXER/PHYAD0
- *   PA7      RMII_CRS_DV  CRS_DV/MODE2
- *   PC1      RMII_MDC     MDC
- *   PA2      RMII_MDIO    MDIO
- *   N/A      NRST         nRST
- *   PA1      RMII_REF_CLK nINT/REFCLK0
- *   N/A      OSC_25M      XTAL1/CLKIN
- *
- * The PHY address is 0, since RMII_RXER/PHYAD0 features a pull down.
- * After reset, RMII_RXER/PHYAD0 switches to the RXER function,
- * receive errors can be detected using GPIO pin PD5
+ *   FUNCTION  GPIO
+ *   --------- -----
+ *   SPI3_SCK  PB3
+ *   SPI3_MISO PB4
+ *   SPI3_MOSI PB5
+ *   SPI3_NSS  PA15
  */
 
-#define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
-#define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
-#define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_2
+#define GPIO_SPI3_SCK GPIO_SPI3_SCK_1
+#define GPIO_SPI3_MISO GPIO_SPI3_MISO_1
+#define GPIO_SPI3_MOSI GPIO_SPI3_MOSI_2
+#define GPIO_SPI3_NSS GPIO_SPI3_NSS_1
 
-/* I2C Mapping
- * I2C #4 is connected to the LCD daughter board
- * and the WM8994 audio codec.
+/*
+ * SPI3 DMA:
+ *   DMAMAP_SPI3_RX_1 = Channel 0, Stream 0
+ *   DMAMAP_SPI3_RX_2 = Channel 0, Stream 2
  *
- * I2C4_SCL - PD12
- * I2C4_SDA - PB7
+ *   DMAMAP_SPI3_TX_1 = Channel 0, Stream 5
+ *   DMAMAP_SPI3_TX_2 = Channel 0, Stream 7
  */
-#define GPIO_I2C4_SCL        GPIO_I2C4_SCL_1
-#define GPIO_I2C4_SDA        GPIO_I2C4_SDA_5
+#define DMAMAP_SPI3_RX DMAMAP_SPI3_RX_1
+#define DMAMAP_SPI3_TX DMAMAP_SPI3_TX_1
+
+/* SPI4:
+ *
+ *   FUNCTION  GPIO  DEVICE
+ *   --------- ----- --------
+ *   SPI4_SCK  PE2
+ *   SPI4_MISO PE5
+ *   SPI4_MOSI PE6
+ *   --------- ----- --------
+ *   SPI4_NSS0  PA2   BMP280 Temperature
+ *   SPI4_NSS1  PA3   AK8963N Pressure
+ */
+
+#define GPIO_SPI4_SCK GPIO_SPI4_SCK_1
+#define GPIO_SPI4_MISO GPIO_SPI4_MISO_1
+#define GPIO_SPI4_MOSI GPIO_SPI4_MOSI_1
+
+#define GPIO_SPI4_NSS0 (GPIO_OUTPUT|GPIO_PULLUP|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN2)
+#define GPIO_SPI4_NSS1 (GPIO_OUTPUT|GPIO_PULLUP|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN3)
+
+/* CAN1:
+ *
+ *   FUNCTION  GPIO
+ *   --------- -----
+ *   CAN1_RX   PB8
+ *   CAN1_TX   PB9
+ */
+
+
+
+/* UART4:
+ *
+ *   FUNCTION  GPIO
+ *   --------- -----
+ *   UART4_RX  PA1
+ *   UART4_TX  PA0
+ */
+
+#define GPIO_UART4_RX GPIO_UART4_RX_1
+#define GPIO_UART4_TX GPIO_UART4_TX_1
+
+/* UART5:
+ *
+ *   FUNCTION  GPIO
+ *   --------- -----
+ *   UART5_RX  PB12
+ *   UART5_TX  PB13
+ */
+
+#define GPIO_UART5_RX GPIO_UART5_RX_3
+#define GPIO_UART5_TX GPIO_UART5_TX_3
+
+/* UART7:
+ *
+ *   FUNCTION  GPIO
+ *   --------- -----
+ *   UART7_RX  PE7
+ *   UART7_TX  PE8
+ */
+
+#define GPIO_UART7_RX GPIO_UART7_RX_1
+#define GPIO_UART7_TX GPIO_UART7_TX_1
+
+/* UART8:
+ *
+ *   FUNCTION  GPIO
+ *   --------- -----
+ *   UART8_RX  PE0
+ *   UART8_TX  PE1
+ *
+ *   ______________
+ *   IMPORTANT NOTE:
+ *   	Do NOT re-define!!
+ *   	There is only one possible pin assignment!
+ */
+
 
 /* SDMMC */
 
@@ -410,8 +480,8 @@
  *   DMAMAP_SDMMC2_2 = Channel 11, Stream 5
  */
 
-// #define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
-#define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
+#define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
+//#define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
 
 /* SDIO dividers.  Note that slower clocking is required when DMA is disabled
  * in order to avoid RX overrun/TX underrun errors due to delayed responses
@@ -442,35 +512,5 @@
 #else
 #  define STM32_SDMMC_SDXFR_CLKDIV   (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
 #endif
-
-/* SDMMC2 Pin mapping
- *
- * D0 - PG9
- * D1 - PG10
- * D2 - PB3
- * D3 - PB4
- */
-#define GPIO_SDMMC2_D0  GPIO_SDMMC2_D0_2
-#define GPIO_SDMMC2_D1  GPIO_SDMMC2_D1_2
-#define GPIO_SDMMC2_D2  GPIO_SDMMC2_D2_1
-#define GPIO_SDMMC2_D3  GPIO_SDMMC2_D3_1
-
-/* LCD DISPLAY
- * (work in progress as of 2017 07 19)
- */
-#define	BOARD_LTDC_WIDTH        800
-#define	BOARD_LTDC_HEIGHT       472
-
-#define	BOARD_LTDC_HSYNC        10
-#define	BOARD_LTDC_HFP          10
-#define	BOARD_LTDC_HBP          20
-#define	BOARD_LTDC_VSYNC        2
-#define	BOARD_LTDC_VFP          4
-#define	BOARD_LTDC_VBP          2
-
-#define	BOARD_LTDC_GCR_PCPOL    0
-#define	BOARD_LTDC_GCR_DEPOL    0
-#define	BOARD_LTDC_GCR_VSPOL    0
-#define	BOARD_LTDC_GCR_HSPOL    0
 
 #endif  /* __CONFIG_INTELLIFLIGHT_V1_INCLUDE_BOARD_H */

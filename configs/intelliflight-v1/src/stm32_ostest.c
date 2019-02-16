@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "intelliflight.h"
+#include "intelliflight-v1.h"
 
 /************************************************************************************
  * Pre-processor Definitions

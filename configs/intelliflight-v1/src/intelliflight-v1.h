@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * configs/intelliflight/src/intelliflight.h
+ * configs/intelliflight/src/intelliflight-v1.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

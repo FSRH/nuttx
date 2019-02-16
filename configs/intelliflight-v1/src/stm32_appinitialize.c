@@ -41,7 +41,7 @@
 #include <sys/types.h>
 
 #include "stm32_ccm.h"
-#include "intelliflight.h"
+#include "intelliflight-v1.h"
 
 /****************************************************************************
  * Public Functions

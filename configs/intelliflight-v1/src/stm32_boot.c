@@ -45,7 +45,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "intelliflight.h"
+#include "intelliflight-v1.h"
 
 /************************************************************************************
  * Pre-processor Definitions

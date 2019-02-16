@@ -51,7 +51,7 @@
 #include "chip.h"
 #include "stm32_spi.h"
 
-#include "intelliflight.h"
+#include "intelliflight-v1.h"
 
 #if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
     defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
