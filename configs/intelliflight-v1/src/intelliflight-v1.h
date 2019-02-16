@@ -49,6 +49,45 @@
  ****************************************************************************************************/
 /* procfs File System */
 
+
+/* Assume that we have everything */
+
+#define HAVE_USBDEV     1
+#define HAVE_USBHOST    1
+#define HAVE_USBMONITOR 1
+#define HAVE_SDIO       1
+#define HAVE_CS43L22    1
+#define HAVE_RTC_DRIVER 1
+#define HAVE_NETMONITOR 1
+#define HAVE_HCIUART    1
+
+/* Can't support USB host or device features if USB OTG FS is not enabled */
+
+#ifndef CONFIG_STM32_OTGFS
+#  undef HAVE_USBDEV
+#  undef HAVE_USBHOST
+#  undef HAVE_USBMONITOR
+#endif
+
+/* Can't support USB device monitor if USB device is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef HAVE_USBDEV
+#  undef HAVE_USBMONITOR
+#endif
+
+/* Can't support USB host is USB host is not enabled */
+
+#ifndef CONFIG_USBHOST
+#  undef HAVE_USBHOST
+#endif
+
+/* Check if we should enable the USB monitor before starting NSH */
+
+#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
+#  undef HAVE_USBMONITOR
+#endif
+
 #ifdef CONFIG_FS_PROCFS
 #  ifdef CONFIG_NSH_PROC_MOUNTPOINT
 #    define STM32_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
@@ -69,6 +108,9 @@
  */
 
 #define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
+
+#define GPIO_OTGFS_VBUS    (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
+                            GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
 
 /* Sporadic scheduler instrumentation. This configuration has been used for evaluating the NuttX
  * sporadic scheduler.  In this evaluation, two GPIO outputs are used.  One indicating the priority
