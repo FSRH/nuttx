@@ -49,7 +49,6 @@
  ****************************************************************************************************/
 /* procfs File System */
 
-
 /* Assume that we have everything */
 
 #define HAVE_USBDEV     1
@@ -148,6 +147,19 @@
 void weak_function stm32_spidev_initialize(void);
 
 /****************************************************************************************************
+ * Name: stm32_usbinitialize
+ *
+ * Description:
+ *   Called from stm32_usbinitialize very early in initialization to setup USB-related
+ *   GPIO pins for the Mikroe-stm32f4 board.
+ *
+ ****************************************************************************************************/
+
+#ifdef CONFIG_STM32_OTGFS
+void weak_function stm32_usbinitialize(void);
+#endif
+
+/****************************************************************************************************
  * Name: arch_sporadic_initialize
  *
  * Description:
@@ -157,6 +169,31 @@ void weak_function stm32_spidev_initialize(void);
 
 #ifdef CONFIG_SPORADIC_INSTRUMENTATION
 void arch_sporadic_initialize(void);
+#endif
+
+/****************************************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ****************************************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
+/****************************************************************************************************
+ * Name: stm32_usbhost_initialize
+ *
+ * Description:
+ *   Called at application startup time to initialize the USB host functionality. This function will
+ *   start a thread that will monitor for device connection/disconnection events.
+ *
+ ****************************************************************************************************/
+
+#if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
+#  error "The Intelliflight-v1 board does not support HOST OTG, only device!"
 #endif
 
 #endif /* __ASSEMBLY__ */
