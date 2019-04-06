@@ -21,7 +21,7 @@
 
 #include "chip.h"
 #include "up_arch.h"
-#include "stm32_pwm.h"
+#include <stm32/stm32_pwm.h>
 
 #include "intelliflight-v1.h"
 
