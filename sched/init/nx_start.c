@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/compiler.h>
 #include <nuttx/sched.h>
 #include <nuttx/fs/fs.h>
@@ -498,11 +499,13 @@ void nx_start(void)
        */
 
 #ifdef CONFIG_SMP
-      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_NONCANCELABLE |
+      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
+                                  TCB_FLAG_NONCANCELABLE |
                                   TCB_FLAG_CPU_LOCKED);
       g_idletcb[cpu].cmn.cpu   = cpu;
 #else
-      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_NONCANCELABLE);
+      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
+                                  TCB_FLAG_NONCANCELABLE);
 #endif
 
 #ifdef CONFIG_SMP
@@ -521,7 +524,8 @@ void nx_start(void)
       /* Set the IDLE task name */
 
 #  ifdef CONFIG_SMP
-      snprintf(g_idletcb[cpu].cmn.name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE", cpu);
+      snprintf(g_idletcb[cpu].cmn.name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE",
+               cpu);
 #  else
       strncpy(g_idletcb[cpu].cmn.name, g_idlename, CONFIG_TASK_NAME_SIZE);
       g_idletcb[cpu].cmn.name[CONFIG_TASK_NAME_SIZE] = '\0';
@@ -569,6 +573,7 @@ void nx_start(void)
   g_nx_initstate = OSINIT_TASKLISTS;
 
   /* Initialize RTOS facilities *********************************************/
+
   /* Initialize the semaphore facility.  This has to be done very early
    * because many subsystems depend upon fully functional semaphores.
    */
@@ -707,6 +712,8 @@ void nx_start(void)
   net_initialize();
 #endif
 
+  /* Initialize Hardware Facilities *****************************************/
+
   /* The processor specific details of running the operating system
    * will be handled here.  Such things as setting up interrupt
    * service routines and starting the clock are some of the things
@@ -715,9 +722,20 @@ void nx_start(void)
 
   up_initialize();
 
-  /* Hardware resources are available */
+#ifdef CONFIG_BOARD_EARLY_INITIALIZE
+  /* Call the board-specific up_initialize() extension to support
+   * early initialization of board-specific drivers and resources
+   * that cannot wait until board_late_initialize.
+   */
+
+  board_early_initialize();
+#endif
+
+  /* Hardware resources are now available */
 
   g_nx_initstate = OSINIT_HARDWARE;
+
+  /* Setup for Multi-Tasking ************************************************/
 
 #ifdef CONFIG_MM_SHM
   /* Initialize shared memory support */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_start.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,13 +43,14 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/cache.h>
 #include <nuttx/init.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
+#include "barriers.h"
 
-#include "cache.h"
 #ifdef CONFIG_ARCH_FPU
 #  include "nvic.h"
 #endif
@@ -391,9 +392,8 @@ void __start(void)
 
   /* Enable I- and D-Caches */
 
-  arch_dcache_writethrough();
-  arch_enable_icache();
-  arch_enable_dcache();
+  up_enable_icache();
+  up_enable_dcache();
 
   /* Perform early serial initialization */
 

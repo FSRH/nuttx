@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_start.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,16 +43,14 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/cache.h>
 #include <nuttx/init.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
-
-#include "cache.h"
-#ifdef CONFIG_ARCH_FPU
-#  include "nvic.h"
-#endif
+#include "nvic.h"
+#include "barriers.h"
 
 #include "stm32_rcc.h"
 #include "stm32_userspace.h"
@@ -62,6 +60,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Memory Map ***************************************************************/
 /*
  * 0x0400:0000 - Beginning of the internal FLASH.   Address of vectors.
@@ -372,9 +371,14 @@ void __start(void)
 
   /* Enable I- and D-Caches */
 
-  arch_dcache_writethrough();
-  arch_enable_icache();
-  arch_enable_dcache();
+  up_enable_icache();
+  up_enable_dcache();
+
+#ifdef CONFIG_ARMV7M_ITMSYSLOG
+  /* Perform ARMv7-M ITM SYSLOG initialization */
+
+  itm_syslog_initialize();
+#endif
 
   /* Perform early serial initialization */
 

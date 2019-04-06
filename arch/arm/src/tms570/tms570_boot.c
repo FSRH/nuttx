@@ -54,7 +54,6 @@
 
 #include "chip.h"
 #include "arm.h"
-#include "cache.h"
 #include "fpu.h"
 #include "sctlr.h"
 #include "up_internal.h"
@@ -197,7 +196,7 @@ static void tms570_memory_initialize(uint32_t ramset)
 
   /* Wait until Memory Hardware Initialization complete */
 
-  while((getreg32(TMS570_SYS_MSTCGSTAT) & SYS_MSTCGSTAT_MINIDONE) == 0);
+  while ((getreg32(TMS570_SYS_MSTCGSTAT) & SYS_MSTCGSTAT_MINIDONE) == 0);
 
   /* Disable Memory Hardware Initialization */
 
@@ -419,11 +418,13 @@ void arm_boot(void)
 
 #ifdef CONFIG_TMS570_SELFTEST
   /* Test the parity protection mechanism for peripheral RAMs */
+
 #warning Missing logic
 #endif
 
 #ifdef CONFIG_TMS570_MIBASPI1
   /* Wait for MibSPI1 RAM to complete initialization */
+
 #warning Missing logic
 #endif
 

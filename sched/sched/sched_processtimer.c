@@ -170,7 +170,7 @@ static inline void nxsched_process_scheduler(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_process_timer
+ * Name:  nxsched_process_timer
  *
  * Description:
  *   This function handles system timer events.
@@ -187,7 +187,7 @@ static inline void nxsched_process_scheduler(void)
  *
  ****************************************************************************/
 
-void sched_process_timer(void)
+void nxsched_process_timer(void)
 {
 #ifdef CONFIG_CLOCK_TIMEKEEPING
   /* Process wall time */
@@ -210,10 +210,10 @@ void sched_process_timer(void)
    */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (sched_process_cpuload != NULL)
+  if (nxsched_process_cpuload != NULL)
 #endif
     {
-      sched_process_cpuload();
+      nxsched_process_cpuload();
     }
 #endif
 
