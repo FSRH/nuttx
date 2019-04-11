@@ -44,7 +44,7 @@
 #include <syslog.h>
 #include <errno.h>
 
-#include "stm32f746g-disco.h"
+#include "../../stm32f746g-disco/src/stm32f746g-disco.h"
 
 #ifdef CONFIG_BUTTONS
 #  include <nuttx/input/buttons.h>

@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/stm32f746g-disco/src/stm32_sporadic.c
+ * configs/stm32f769i-disco/src/stm32_userleds.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,53 +40,64 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-
-#include <nuttx/sched.h>
-#include "../../stm32f746g-disco/src/stm32f746g-disco.h"
+#include <debug.h>
+#include "../../ofc-disco/src/ofc-disco.h"
 #include "stm32_gpio.h"
 
-#ifdef CONFIG_SPORADIC_INSTRUMENTATION
+#ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arch_sporadic_*
+ * Name: board_userled_initialize
  *
  * Description:
- *   This configuration has been used for evaluating the NuttX sporadic
- *   scheduler.  This only makes sense when uses with the sporadic test
- *   which is a part of apps/examples/ostest.  If would make generate
- *   meaningful output in its current state if there were multiple sporadic
- *   threads
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
+ *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the
+ *   board_userled_initialize() is available to initialize the LED from user
+ *   application logic.
  *
  ****************************************************************************/
 
-void arch_sporadic_initialize(void)
+void board_userled_initialize(void)
 {
-  stm32_configgpio(GPIO_SCHED_HIGHPRI);
-  stm32_configgpio(GPIO_SCHED_RUNNING);
+  stm32_configgpio(GPIO_LD3);
 }
 
-void arch_sporadic_start(FAR struct tcb_s *tcb)
+/****************************************************************************
+ * Name: board_userled
+ *
+ * Description:
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
+ *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled() is
+ *  available to control the LED from user application logic.
+ *
+ ****************************************************************************/
+
+void board_userled(int led, bool ledon)
 {
-  stm32_gpiowrite(GPIO_SCHED_HIGHPRI, true);
+  if (led == BOARD_STATUS_LED)
+    {
+      stm32_gpiowrite(GPIO_LD3, !ledon);
+    }
 }
 
-void arch_sporadic_lowpriority(FAR struct tcb_s *tcb)
+/****************************************************************************
+ * Name: board_userled_all
+ *
+ * Description:
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
+ *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled_all() is
+ *  available to control the LED from user application logic.  NOTE:  since
+ *  there is only a single LED on-board, this is function is not very useful.
+ *
+ ****************************************************************************/
+
+void board_userled_all(uint8_t ledset)
 {
-  stm32_gpiowrite(GPIO_SCHED_HIGHPRI, false);
+  stm32_gpiowrite(GPIO_LD3, (ledset & BOARD_STATUS_LED_BIT) != 0);
 }
 
-void arch_sporadic_suspend(FAR struct tcb_s *tcb)
-{
-  stm32_gpiowrite(GPIO_SCHED_RUNNING, false);
-}
-
-void arch_sporadic_resume(FAR struct tcb_s *tcb)
-{
-  stm32_gpiowrite(GPIO_SCHED_RUNNING, true);
-}
-
-#endif /* CONFIG_SPORADIC_INSTRUMENTATION */
+#endif /* !CONFIG_ARCH_LEDS */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f746g-disco/src/stm32_sporadic.c
+ * configs/stm32f769i-disco/scripts/user-space.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,60 +33,79 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+/* NOTE:  This depends on the memory.ld script having been included prior to
+ * this script.
+ */
 
-#include <nuttx/config.h>
-
-#include <stdbool.h>
-
-#include <nuttx/sched.h>
-#include "../../stm32f746g-disco/src/stm32f746g-disco.h"
-#include "stm32_gpio.h"
-
-#ifdef CONFIG_SPORADIC_INSTRUMENTATION
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: arch_sporadic_*
- *
- * Description:
- *   This configuration has been used for evaluating the NuttX sporadic
- *   scheduler.  This only makes sense when uses with the sporadic test
- *   which is a part of apps/examples/ostest.  If would make generate
- *   meaningful output in its current state if there were multiple sporadic
- *   threads
- *
- ****************************************************************************/
-
-void arch_sporadic_initialize(void)
+OUTPUT_ARCH(arm)
+SECTIONS
 {
-  stm32_configgpio(GPIO_SCHED_HIGHPRI);
-  stm32_configgpio(GPIO_SCHED_RUNNING);
-}
+    .userspace : {
+        *(.userspace)
+    } > uflash
 
-void arch_sporadic_start(FAR struct tcb_s *tcb)
-{
-  stm32_gpiowrite(GPIO_SCHED_HIGHPRI, true);
-}
+    .text : {
+        _stext = ABSOLUTE(.);
+        *(.text .text.*)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.rodata .rodata.*)
+        *(.gnu.linkonce.t.*)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.r.*)
+        _etext = ABSOLUTE(.);
+    } > uflash
 
-void arch_sporadic_lowpriority(FAR struct tcb_s *tcb)
-{
-  stm32_gpiowrite(GPIO_SCHED_HIGHPRI, false);
-}
+    .init_section : {
+        _sinit = ABSOLUTE(.);
+        *(.init_array .init_array.*)
+        _einit = ABSOLUTE(.);
+    } > uflash
 
-void arch_sporadic_suspend(FAR struct tcb_s *tcb)
-{
-  stm32_gpiowrite(GPIO_SCHED_RUNNING, false);
-}
+    .ARM.extab : {
+        *(.ARM.extab*)
+    } > uflash
 
-void arch_sporadic_resume(FAR struct tcb_s *tcb)
-{
-  stm32_gpiowrite(GPIO_SCHED_RUNNING, true);
-}
+    __exidx_start = ABSOLUTE(.);
+    .ARM.exidx : {
+        *(.ARM.exidx*)
+    } > uflash
 
-#endif /* CONFIG_SPORADIC_INSTRUMENTATION */
+    __exidx_end = ABSOLUTE(.);
+
+    _eronly = ABSOLUTE(.);
+
+    .data : {
+        _sdata = ABSOLUTE(.);
+        *(.data .data.*)
+        *(.gnu.linkonce.d.*)
+        CONSTRUCTORS
+        _edata = ABSOLUTE(.);
+    } > usram AT > uflash
+
+    .bss : {
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.gnu.linkonce.b.*)
+        *(COMMON)
+        _ebss = ABSOLUTE(.);
+    } > usram
+
+    /* Stabs debugging sections */
+
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
+}

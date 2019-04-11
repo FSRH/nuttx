@@ -41,9 +41,8 @@
 
 #include <stdbool.h>
 #include <debug.h>
-
+#include "../../intelliflight-v1/src/intelliflight-v1.h"
 #include "stm32_gpio.h"
-#include "intelliflight-v1.h"
 
 #ifndef CONFIG_ARCH_LEDS
 

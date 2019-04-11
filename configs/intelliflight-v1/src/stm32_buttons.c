@@ -43,9 +43,8 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/board.h>
-
+#include "../../intelliflight-v1/src/intelliflight-v1.h"
 #include "stm32_gpio.h"
-#include "intelliflight-v1.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

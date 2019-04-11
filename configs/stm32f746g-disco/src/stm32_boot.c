@@ -44,8 +44,8 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "../../stm32f746g-disco/src/stm32f746g-disco.h"
 #include "up_arch.h"
-#include "stm32f746g-disco.h"
 
 /************************************************************************************
  * Public Functions

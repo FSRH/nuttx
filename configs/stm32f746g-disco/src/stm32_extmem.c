@@ -49,9 +49,9 @@
 #include "stm32_fmc.h"
 #include "stm32_gpio.h"
 #include "stm32_rcc.h"
-#include "stm32f746g-disco.h"
-
 #include <arch/board/board.h>
+
+#include "../../stm32f746g-disco/src/stm32f746g-disco.h"
 
 /************************************************************************************
  * Pre-processor Definitions

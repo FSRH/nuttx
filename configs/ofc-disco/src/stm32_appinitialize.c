@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/stm32f746g-disco/src/stm32_sporadic.c
+ * config/stm32f769i-disco/src/stm32_appinitialize.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,55 +38,62 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
 
-#include <stdbool.h>
-
-#include <nuttx/sched.h>
-#include "../../stm32f746g-disco/src/stm32f746g-disco.h"
-#include "stm32_gpio.h"
-
-#ifdef CONFIG_SPORADIC_INSTRUMENTATION
+#include "../../ofc-disco/src/ofc-disco.h"
+#include "stm32_ccm.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arch_sporadic_*
+ * Name: board_app_initialize
  *
  * Description:
- *   This configuration has been used for evaluating the NuttX sporadic
- *   scheduler.  This only makes sense when uses with the sporadic test
- *   which is a part of apps/examples/ostest.  If would make generate
- *   meaningful output in its current state if there were multiple sporadic
- *   threads
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initalization logic and the
+ *         matching application logic.  The value cold be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-void arch_sporadic_initialize(void)
+int board_app_initialize(uintptr_t arg)
 {
-  stm32_configgpio(GPIO_SCHED_HIGHPRI);
-  stm32_configgpio(GPIO_SCHED_RUNNING);
-}
+#ifdef CONFIG_FS_PROCFS
+  int ret;
 
-void arch_sporadic_start(FAR struct tcb_s *tcb)
-{
-  stm32_gpiowrite(GPIO_SCHED_HIGHPRI, true);
-}
+#ifdef CONFIG_STM32_CCM_PROCFS
+  /* Register the CCM procfs entry.  This must be done before the procfs is
+   * mounted.
+   */
 
-void arch_sporadic_lowpriority(FAR struct tcb_s *tcb)
-{
-  stm32_gpiowrite(GPIO_SCHED_HIGHPRI, false);
-}
+  (void)ccm_procfs_register();
+#endif
 
-void arch_sporadic_suspend(FAR struct tcb_s *tcb)
-{
-  stm32_gpiowrite(GPIO_SCHED_RUNNING, false);
-}
+  /* Mount the procfs file system */
 
-void arch_sporadic_resume(FAR struct tcb_s *tcb)
-{
-  stm32_gpiowrite(GPIO_SCHED_RUNNING, true);
-}
+  ret = mount(NULL, SAMV71_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      SYSLOG("ERROR: Failed to mount procfs at %s: %d\n",
+             SAMV71_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
 
-#endif /* CONFIG_SPORADIC_INSTRUMENTATION */
+  return OK;
+}

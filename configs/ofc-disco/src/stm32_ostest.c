@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f769i-disco/src/stm32_boot.c
+ * configs/stm32f769i-disco/src/stm32_ostest.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,17 +39,41 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "../../stm32f769i-disco/src/stm32f769i-disco.h"
+#include "../../ofc-disco/src/ofc-disco.h"
 #include "up_arch.h"
+#include "up_internal.h"
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration ********************************************************************/
+
+#undef HAVE_FPU
+#if defined(CONFIG_ARCH_FPU) && !defined(CONFIG_TESTING_OSTEST_FPUTESTDISABLE) && \
+    defined(CONFIG_TESTING_OSTEST_FPUSIZE) && defined(CONFIG_SCHED_WAITPID) && \
+    !defined(CONFIG_DISABLE_SIGNALS)
+#    define HAVE_FPU 1
+#endif
+
+#ifdef HAVE_FPU
+
+#if CONFIG_TESTING_OSTEST_FPUSIZE != (4*SW_FPU_REGS)
+#  error "CONFIG_TESTING_OSTEST_FPUSIZE has the wrong size"
+#endif
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+static uint32_t g_saveregs[XCPTCONTEXT_REGS];
 
 /************************************************************************************
  * Private Functions
@@ -59,69 +83,32 @@
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: stm32_boardinitialize
- *
- * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
+/* Given an array of size CONFIG_TESTING_OSTEST_FPUSIZE, this function will return
+ * the current FPU registers.
+ */
 
-void stm32_boardinitialize(void)
+void arch_getfpu(FAR uint32_t *fpusave)
 {
-#if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
-    defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
-    defined(CONFIG_STM32F7_SPI5)
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spidev_initialize() has been brought into the link.
-   */
+  irqstate_t flags;
 
-  if (stm32_spidev_initialize)
-    {
-      stm32_spidev_initialize();
-    }
-#endif
+  /* Take a snapshot of the thread context right now */
 
-#ifdef CONFIG_SPORADIC_INSTRUMENTATION
-  /* This configuration has been used for evaluating the NuttX sporadic scheduler.
-   * The following caqll initializes the sporadic scheduler monitor.
-   */
+  flags = enter_critical_section();
+  up_saveusercontext(g_saveregs);
 
-  arch_sporadic_initialize();
-#endif
+  /* Return only the floating register values */
 
-#ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected. */
-
-  board_autoled_initialize();
-#endif
+  memcpy(fpusave, &g_saveregs[REG_S0], (4*SW_FPU_REGS));
+  leave_critical_section(flags);
 }
 
-/************************************************************************************
- * Name: board_initialize
- *
- * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional initialization call
- *   will be performed in the boot-up sequence to a function called
- *   board_initialize().  board_initialize() will be called immediately after
- *   up_initialize() is called and just before the initial application is started.
- *   This additional initialization phase may be used, for example, to initialize
- *   board-specific device drivers.
- *
- ************************************************************************************/
+/* Given two arrays of size CONFIG_TESTING_OSTEST_FPUSIZE this function
+ * will compare them and return true if they are identical.
+ */
 
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void)
+bool arch_cmpfpu(FAR const uint32_t *fpusave1, FAR const uint32_t *fpusave2)
 {
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
-  /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in user-space
-   * but the initialization function must run in kernel space.
-   */
-
-  (void)board_app_initialize(0);
-#endif
+  return memcmp(fpusave1, fpusave2, (4*SW_FPU_REGS)) == 0;
 }
-#endif
+
+#endif /* HAVE_FPU */

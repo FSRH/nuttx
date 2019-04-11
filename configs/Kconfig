@@ -19,7 +19,15 @@ config ARCH_BOARD_INTELLIFLIGHT_V1
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		IntelliFlight v1 development board featuring the STM32F765VG MCU. 
+		IntelliFlight v1 development board featuring the STM32F765VG MCU.
+	
+config ARCH_BOARD_OFC_DISCO
+	bool "ofc-disco dev board"
+	depends on ARCH_CHIP_STM32F765VG
+	select ARCH_HAVE_LEDS
+	---help---
+		OFC-disco is a board featuring the STM32F765VG MCU.
+			 
 config ARCH_BOARD_AMBER
 	bool "Amber Web Server"
 	depends on ARCH_CHIP_ATMEGA128
@@ -1782,6 +1790,7 @@ endif #ARCH_BOARD_CUSTOM
 config ARCH_BOARD
 	string
 	default "intelliflight-v1"         if ARCH_BOARD_INTELLIFLIGHT_V1
+	default	"ofc-disco"				   if ARCH_BOARD_OFC_DISCO
 	default "amber"                    if ARCH_BOARD_AMBER
 	default "arduino-mega2560"         if ARCH_BOARD_ARDUINO_MEGA2560
 	default "arduino-due"              if ARCH_BOARD_ARDUINO_DUE
@@ -1986,6 +1995,9 @@ comment "Board-Specific Options"
 
 if ARCH_BOARD_INTELLIFLIGHT_V1
 source "configs/intelliflight-v1/Kconfig"
+endif
+if ARCH_BOARD_OFC_DISCO
+source "configs/ofc-disco/Kconfig"
 endif
 if ARCH_BOARD_AMBER
 source "configs/amber/Kconfig"

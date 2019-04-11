@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/stm32f769i-disco/src/stm32_userleds.c
+ * configs/stm32f769i-disco/src/stm32_autoleds.c
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,63 +41,87 @@
 
 #include <stdbool.h>
 #include <debug.h>
-#include "../../stm32f769i-disco/src/stm32f769i-disco.h"
+
+#include <nuttx/board.h>
+#include "../../ofc-disco/src/ofc-disco.h"
 #include "stm32_gpio.h"
 
-#ifndef CONFIG_ARCH_LEDS
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_userled_initialize
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the
- *   board_userled_initialize() is available to initialize the LED from user
- *   application logic.
- *
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+void board_autoled_initialize(void)
 {
+  /* Configure the LD1 GPIO for output. Initial state is OFF */
+
   stm32_configgpio(GPIO_LD3);
 }
 
 /****************************************************************************
- * Name: board_userled
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled() is
- *  available to control the LED from user application logic.
- *
+ * Name: board_autoled_on
  ****************************************************************************/
 
-void board_userled(int led, bool ledon)
+void board_autoled_on(int led)
 {
-  if (led == BOARD_STATUS_LED)
+  bool ledstate = false;
+
+  switch (led)
     {
-      stm32_gpiowrite(GPIO_LD3, !ledon);
+    case 0:                   /* LED_STARTED:      NuttX has been started  STATUS LED=OFF */
+                              /* LED_HEAPALLOCATE: Heap has been allocated STATUS LED=OFF */
+                              /* LED_IRQSENABLED:  Interrupts enabled      STATUS LED=OFF */
+      break;                  /* Leave ledstate == true to turn OFF */
+
+    default:
+    case 2:                   /* LED_INIRQ:        In an interrupt         STATUS LED=N/C */
+                              /* LED_SIGNAL:       In a signal handler     STATUS LED=N/C */
+                              /* LED_ASSERTION:    An assertion failed     STATUS LED=N/C */
+      return;                 /* Return to leave STATUS LED unchanged */
+
+    case 3:                   /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
+    case 1:                   /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
+      ledstate = true;       /* Set ledstate == false to turn ON */
+      break;
     }
+
+   stm32_gpiowrite(GPIO_LD3, ledstate);
 }
 
 /****************************************************************************
- * Name: board_userled_all
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled_all() is
- *  available to control the LED from user application logic.  NOTE:  since
- *  there is only a single LED on-board, this is function is not very useful.
- *
+ * Name: board_autoled_off
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_autoled_off(int led)
 {
-  stm32_gpiowrite(GPIO_LD3, (ledset & BOARD_STATUS_LED_BIT) != 0);
+  switch (led)
+    {
+    /* These should not happen and are ignored */
+
+    default:
+    case 0:                   /* LED_STARTED:      NuttX has been started  STATUS LED=OFF */
+                              /* LED_HEAPALLOCATE: Heap has been allocated STATUS LED=OFF */
+                              /* LED_IRQSENABLED:  Interrupts enabled      STATUS LED=OFF */
+    case 1:                   /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
+
+    /* These result in no-change */
+
+    case 2:                   /* LED_INIRQ:        In an interrupt         STATUS LED=N/C */
+                              /* LED_SIGNAL:       In a signal handler     STATUS LED=N/C */
+                              /* LED_ASSERTION:    An assertion failed     STATUS LED=N/C */
+      return;                 /* Return to leave STATUS LED unchanged */
+
+    /* Turn STATUS LED off set driving the output high */
+
+    case 3:                   /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
+      stm32_gpiowrite(GPIO_LD3, false);
+      break;
+    }
 }
 
-#endif /* !CONFIG_ARCH_LEDS */
+#endif /* CONFIG_ARCH_LEDS */

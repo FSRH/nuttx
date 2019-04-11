@@ -40,8 +40,8 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include "../../stm32f769i-disco/src/stm32f769i-disco.h"
 #include "stm32_ccm.h"
-#include "stm32f769i-disco.h"
 
 /****************************************************************************
  * Public Functions

@@ -45,9 +45,9 @@
 #include <nuttx/board.h>
 
 #include "stm32_gpio.h"
-#include "stm32f746g-disco.h"
-
 #include <arch/board/board.h> /* Should always be included last */
+
+#include "../../stm32f746g-disco/src/stm32f746g-disco.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

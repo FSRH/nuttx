@@ -40,8 +40,8 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include "../../intelliflight-v1/src/intelliflight-v1.h"
 #include "stm32_ccm.h"
-#include "intelliflight-v1.h"
 
 /****************************************************************************
  * Public Functions

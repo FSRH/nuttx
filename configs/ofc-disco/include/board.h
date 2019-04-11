@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/intelliflight/include/board.h
+ * configs/stm32f769i-disco/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIG_INTELLIFLIGHT_V1_INCLUDE_BOARD_H
-#define __CONFIG_INTELLIFLIGHT_V1_INCLUDE_BOARD_H
+#ifndef __CONFIG_STM32F769I_DISCO_INCLUDE_BOARD_H
+#define __CONFIG_STM32F769I_DISCO_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -316,210 +316,23 @@
 #define LED_ASSERTION                2 /* LD1=no change */
 #define LED_PANIC                    3 /* LD1=flashing */
 
-/* Button definitions ***************************************************************/
-/* The STM32F7 Discovery supports one button:  Pushbutton B1, labelled "User", is
- * connected to GPIO PA0.  A high value will be sensed when the button is depressed.
- */
-
-#define BUTTON_USER        0
-#define NUM_BUTTONS        1
-#define BUTTON_USER_BIT    (1 << BUTTON_USER)
-
 /* Alternate function pin selections ************************************************/
 
-/*PWM
- *
- */
-
-// PWMLED0
-#define GPIO_TIM1_CH4OUT = GPIO_TIM1_CH4OUT_2
-// plain PWM's
-#define GPIO_TIM3_CH3OUT = GPIO_TIM3_CH3OUT_1
-#define GPIO_TIM3_CH4OUT = GPIO_TIM3_CH4OUT_1
-#define GPIO_TIM1_CH1OUT = GPIO_TIM1_CH1OUT_2
-#define GPIO_TIM1_CH2OUT = GPIO_TIM1_CH2OUT_2
-#define GPIO_TIM1_CH3OUT = GPIO_TIM1_CH3OUT_2
-#define GPIO_TIM2_CH3OUT = GPIO_TIM2_CH3OUT_2
-#define GPIO_TIM2_CH4OUT = GPIO_TIM2_CH4OUT_2
-#define GPIO_TIM4_CH3OUT = GPIO_TIM4_CH3OUT_2
-#define GPIO_TIM4_CH4OUT = GPIO_TIM4_CH4OUT_2
-
-
-//// PWMLED0
-//#define GPIO_PWMLED0 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN14)
-//// plain PWM's
-//#define GPIO_PWM1 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN0)
-//#define GPIO_PWM2 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
-//#define GPIO_PWM3 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN9)
-//#define GPIO_PWM4 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN11)
-//#define GPIO_PWM5 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN13)
-//#define GPIO_PWM6 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN10)
-//#define GPIO_PWM7 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN11)
-//#define GPIO_PWM8 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN14)
-//#define GPIO_PWM9 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN15)
-
-#define BOARD_PWMLED0 0
-#define BOARD_PWM1 1
-#define BOARD_PWM2 2
-#define BOARD_PWM3 3
-#define BOARD_PWM4 4
-#define BOARD_PWM5 5
-#define BOARD_PWM6 6
-#define BOARD_PWM7 7
-#define BOARD_PWM8 8
-#define BOARD_PWM9 9
-
-#define BOARD_NPWM 10
-
-#define DEV_PWMLED0 "/dev/pwmled0"
-#define DEV_PWM1 1 "/dev/pwm1"
-#define DEV_PWM2 2 "/dev/pwm2"
-#define DEV_PWM3 3 "/dev/pwm3"
-#define DEV_PWM4 4 "/dev/pwm4"
-#define DEV_PWM5 5 "/dev/pwm5"
-#define DEV_PWM6 6 "/dev/pwm6"
-#define DEV_PWM7 7 "/dev/pwm7"
-#define DEV_PWM8 8 "/dev/pwm8"
-#define DEV_PWM9 9 "/dev/pwm9"
-
-static char *pwm_devices[];
-
-/* SPI1: ICM20689 Gyro
- *
- *   FUNCTION  GPIO
- *   --------- -----
- *   SPI1_SCK  PA5
- *   SPI1_MISO PA6
- *   SPI1_MOSI PA7
- *
- *   NOTE:
- *   	NSS is not necessary, since there is only one device
- */
-
-#define GPIO_SPI1_SCK GPIO_SPI1_SCK_1
-#define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
-#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
-
-/* SPI2:
- *
- *   FUNCTION  GPIO
- *   --------- -----
- *   SPI2_SCK  PD3
- *   SPI2_MISO PB14
- *   SPI2_MOSI PB15
- *
- *   NOTE:
- *   	Use only as master; there is no NSS
- *
- *
- * SPI2 DMA:
- *   DMAMAP_SPI2_RX = Channel 0, Stream 3
- *   DMAMAP_SPI2_TX = Channel 0, Stream 4
- *
- */
-
-#define GPIO_SPI2_SCK GPIO_SPI2_SCK_4
-#define GPIO_SPI2_MISO GPIO_SPI2_MISO_1
-#define GPIO_SPI2_MOSI GPIO_SPI2_MOSI_1
-
-/* SPI3:
- *
- *   FUNCTION  GPIO
- *   --------- -----
- *   SPI3_SCK  PB3
- *   SPI3_MISO PB4
- *   SPI3_MOSI PB5
- *   SPI3_NSS  PA15
- */
-
-#define GPIO_SPI3_SCK GPIO_SPI3_SCK_1
-#define GPIO_SPI3_MISO GPIO_SPI3_MISO_1
-#define GPIO_SPI3_MOSI GPIO_SPI3_MOSI_2
-#define GPIO_SPI3_NSS GPIO_SPI3_NSS_1
-
-/*
- * SPI3 DMA:
- *   DMAMAP_SPI3_RX_1 = Channel 0, Stream 0
- *   DMAMAP_SPI3_RX_2 = Channel 0, Stream 2
- *
- *   DMAMAP_SPI3_TX_1 = Channel 0, Stream 5
- *   DMAMAP_SPI3_TX_2 = Channel 0, Stream 7
- */
-#define DMAMAP_SPI3_RX DMAMAP_SPI3_RX_1
-#define DMAMAP_SPI3_TX DMAMAP_SPI3_TX_1
-
-/* SPI4:
- *
- *   FUNCTION  GPIO  DEVICE
- *   --------- ----- --------
- *   SPI4_SCK  PE2
- *   SPI4_MISO PE5
- *   SPI4_MOSI PE6
- *   --------- ----- --------
- *   SPI4_NSS0  PA2   BMP280 Temperature
- *   SPI4_NSS1  PA3   AK8963N Pressure
- */
-
-#define GPIO_SPI4_SCK GPIO_SPI4_SCK_1
-#define GPIO_SPI4_MISO GPIO_SPI4_MISO_1
-#define GPIO_SPI4_MOSI GPIO_SPI4_MOSI_1
-
-#define GPIO_SPI4_NSS0 (GPIO_OUTPUT|GPIO_PULLUP|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN2)
-#define GPIO_SPI4_NSS1 (GPIO_OUTPUT|GPIO_PULLUP|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN3)
-
-/* CAN1:
- *
- *   FUNCTION  GPIO
- *   --------- -----
- *   CAN1_RX   PB8
- *   CAN1_TX   PB9
- */
-
-/* UART4:
- *
- *   FUNCTION  GPIO
- *   --------- -----
- *   UART4_RX  PA1
- *   UART4_TX  PA0
- */
-
-#define GPIO_UART4_RX GPIO_UART4_RX_1
-#define GPIO_UART4_TX GPIO_UART4_TX_1
-
-/* UART5:
- *
- *   FUNCTION  GPIO
- *   --------- -----
- *   UART5_RX  PB12
- *   UART5_TX  PB13
- */
-
-#define GPIO_UART5_RX GPIO_UART5_RX_3
-#define GPIO_UART5_TX GPIO_UART5_TX_3
-
 /* UART7:
+ * UART7 is connected to the "Virtual Com Port" lines
+ * of the ST-LINK controller.
  *
- *   FUNCTION  GPIO
- *   --------- -----
- *   UART7_RX  PE7
- *   UART7_TX  PE8
+ *   -------- ---------------
+ *               STM32F7
+ *   SIGNAME  FUNCTION  GPIO
+ *   -- ----- --------- -----
+ *   VCP_RX   UART7_RX PE7
+ *   VCP_TX   UART7_TX PE8
+ *   -- ----- --------- -----
  */
 
 #define GPIO_UART7_RX GPIO_UART7_RX_1
 #define GPIO_UART7_TX GPIO_UART7_TX_1
-
-/* UART8:
- *
- *   FUNCTION  GPIO
- *   --------- -----
- *   UART8_RX  PE0
- *   UART8_TX  PE1
- *
- *   ______________
- *   IMPORTANT NOTE:
- *   	Do NOT re-define!!
- *   	There is only one possible pin assignment!
- */
 
 /* SDMMC */
 
@@ -535,7 +348,7 @@ static char *pwm_devices[];
  */
 
 #define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
-//#define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
+// #define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
 
 /* SDIO dividers.  Note that slower clocking is required when DMA is disabled
  * in order to avoid RX overrun/TX underrun errors due to delayed responses
@@ -567,4 +380,16 @@ static char *pwm_devices[];
 #  define STM32_SDMMC_SDXFR_CLKDIV   (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
 #endif
 
-#endif  /* __CONFIG_INTELLIFLIGHT_V1_INCLUDE_BOARD_H */
+/* SDMMC2 Pin mapping
+ *
+ * D0 - PC8
+ * D1 - PC9
+ * D2 - PC10
+ * D3 - PC11
+ */
+#define GPIO_SDMMC1_D0  GPIO_SDMMC1_D0
+#define GPIO_SDMMC1_D1  GPIO_SDMMC1_D1
+#define GPIO_SDMMC1_D2  GPIO_SDMMC1_D2
+#define GPIO_SDMMC1_D3  GPIO_SDMMC1_D3
+
+#endif  /* __CONFIG_STM32F769I_DISCO_INCLUDE_BOARD_H */

@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#include "stm32f746g-disco.h"
+#include "../../stm32f746g-disco/src/stm32f746g-disco.h"
 
 #ifdef CONFIG_LIB_BOARDCTL
 

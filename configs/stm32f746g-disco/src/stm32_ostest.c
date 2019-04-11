@@ -47,9 +47,9 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
+#include "../../stm32f746g-disco/src/stm32f746g-disco.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "stm32f746g-disco.h"
 
 /************************************************************************************
  * Pre-processor Definitions

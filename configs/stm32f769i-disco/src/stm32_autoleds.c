@@ -43,9 +43,8 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-
+#include "../../stm32f769i-disco/src/stm32f769i-disco.h"
 #include "stm32_gpio.h"
-#include "stm32f769i-disco.h"
 
 #ifdef CONFIG_ARCH_LEDS
 

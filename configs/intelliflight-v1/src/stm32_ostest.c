@@ -47,9 +47,9 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
+#include "../../intelliflight-v1/src/intelliflight-v1.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "intelliflight-v1.h"
 
 /************************************************************************************
  * Pre-processor Definitions
