@@ -95,12 +95,33 @@
 #  endif
 #endif
 
-/* ItelliFlight v1 GPIOs ***********************************************************************/
-/* The ItelliFlight-v1 has one user controllable LED: LD2.
+/* ItelliFlight v1 LEDs ***********************************************************************/
+/* This board has two LED's:
+ * - one system-controllable status LED: LED1.
+ * - one user-controllable LED: LED2.
+ *
+ * LED1 is on when PC13 is high.
+ * LED2 is on when PD12 is high.
  */
 
-#define GPIO_LD2           (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+#define GPIO_LED1          (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
                             GPIO_PORTC | GPIO_PIN13)
+
+#define GPIO_LED2          (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORTD | GPIO_PIN12)
+
+/* ItelliFlight v1 GPIOs ***********************************************************************/
+/* This board has one user-controllable GPIO pin: PB2
+ */
+
+#define BOARD_NGPIOIN     0 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    0 /* Amount of GPIO Input w/ Interruption pins */
+
+//#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN0)
+#define GPIO_OUT1         	(GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+							GPIO_PORTB | GPIO_PIN2)
+//#define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN2)
 
 /* Pushbutton B1, labelled "User", is connected to GPIO PA0.  A high value will be sensed when the
  * button is depressed. Note that the EXTI interrupt is configured.
@@ -169,6 +190,19 @@ void weak_function stm32_usbinitialize(void);
 
 #ifdef CONFIG_SPORADIC_INSTRUMENTATION
 void arch_sporadic_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers for use with /apps/examples/gpio
+ *   Added by: Stephan Rappensperger + Florian Hölzlwimmer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int stm32_gpio_initialize(void);
 #endif
 
 /****************************************************************************************************

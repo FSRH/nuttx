@@ -82,18 +82,17 @@ int board_app_initialize(uintptr_t arg)
    * mounted.
    */
 
-  (void)ccm_procfs_register();
+  (void) ccm_procfs_register();
 #endif
 
   /* Mount the procfs file system */
 
   ret = mount(NULL, SAMV71_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
-    {
+  if (ret < 0){
       SYSLOG("ERROR: Failed to mount procfs at %s: %d\n",
              SAMV71_PROCFS_MOUNTPOINT, ret);
-    }
+  }
 #endif
 
-  return OK;
+	return OK;
 }

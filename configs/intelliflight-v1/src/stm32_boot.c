@@ -98,6 +98,15 @@ void stm32_boardinitialize(void) {
 	board_autoled_initialize();
 #endif
 
+#ifdef CONFIG_DEV_GPIO
+	/* Initialize GPIO and register the GPIO device drivers. */
+
+	int ret = stm32_gpio_initialize();
+	if (ret < 0) {
+		syslog(LOG_ERR, "ERROR: Failed to initialize GPIO Driver: %d\n", ret);
+	}
+#endif
+
 #ifdef CONFIG_PWM
 	/* Initialize PWM and register the PWM device. */
 

@@ -279,8 +279,6 @@
 #define BOARD_LED1        0
 #define BOARD_NLEDS       1
 
-#define BOARD_LD1         BOARD_LED1
-
 /* LED bits for use with board_userled_all() */
 
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
