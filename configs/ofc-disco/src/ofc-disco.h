@@ -57,14 +57,34 @@
 #  endif
 #endif
 
-/* OFC Discovery GPIOs ***********************************************************************/
-/* The OFC-DISCO has one user controllable LED: LD3.
+/* OFC Discovery LEDs ***********************************************************************/
+/* The OFC-DISCO has two LED's:
+ * - one system-controllable status LED: LD3.
+ * - one user-controllable LED: LD4.
  *
  * LD3 is on when PC13 is high.
+ * LD4 is on when PC13 is high.
  */
 
 #define GPIO_LD3           (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
                             GPIO_PORTC | GPIO_PIN13)
+
+#define GPIO_LD4           (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORTD | GPIO_PIN12)
+
+
+/* OFC Discovery GPIOs ***********************************************************************/
+
+
+#define BOARD_NGPIOIN     0 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    0 /* Amount of GPIO Input w/ Interruption pins */
+
+
+//#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN0)
+#define GPIO_OUT1         (GPIO_OUTPUT | GPIO_OUTPUT | GPIO_SPEED_50MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN2)
+//#define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN2)
 
 /****************************************************************************************************
  * Public data

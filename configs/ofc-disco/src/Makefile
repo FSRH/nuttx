@@ -52,4 +52,8 @@ ifeq ($(CONFIG_ARCH_FPU),y)
 CSRCS += stm32_ostest.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += stm32_gpio.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
