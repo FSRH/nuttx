@@ -46,10 +46,11 @@
 #include "cp15.h"
 #include "sctlr.h"
 #include "mmu.h"
-#include "pg_macros.h"
 
 #include "chip.h"
 #include "up_internal.h"
+
+#ifdef CONFIG_PAGING
 
 	.file	"arm_pghead.S"
 
@@ -705,6 +706,7 @@ __start:
  ***************************************************************************/
 
 	.global	arm_data_initialize
+	.weak	arm_data_initialize
 	.type	arm_data_initialize, #function
 
 arm_data_initialize:
@@ -836,4 +838,5 @@ g_idle_topstack:
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 #endif
 	.size	g_idle_topstack, .-g_idle_topstack
+#endif
 	.end

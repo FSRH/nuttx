@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/cache.h>
 #ifdef CONFIG_PAGING
 #  include <nuttx/page.h>
 #endif
@@ -52,7 +53,6 @@
 #include "chip.h"
 #include "arm.h"
 #include "mmu.h"
-#include "cache.h"
 #include "fpu.h"
 #include "up_internal.h"
 #include "up_arch.h"
@@ -157,14 +157,7 @@ const size_t g_num_mappings = NMAPPINGS;
 #ifndef CONFIG_ARCH_ROMPGTABLE
 static inline void am335x_setupmappings(void)
 {
-  int i;
-
-  /* Set up each group of section mappings */
-
-  for (i = 0; i < g_num_mappings; i++)
-    {
-      mmu_l1_map_region(&g_section_mapping[i]);
-    }
+  mmu_l1_map_regions(g_section_mapping, g_num_mappings);
 }
 #else
 #  define am335x_setupmappings()
@@ -181,14 +174,7 @@ static inline void am335x_setupmappings(void)
 #ifdef NEED_SDRAM_REMAPPING
 static inline void am335x_remap(void)
 {
-  int i;
-
-  /* Re-map each group of section */
-
-  for (i = 0; i < g_num_opmappings; i++)
-    {
-      mmu_l1_map_region(&g_operational_mapping[i]);
-    }
+  mmu_l1_map_regions(g_operational_mapping, g_num_opmappings);
 }
 #endif
 
@@ -348,8 +334,8 @@ static void am335x_copyvectorblock(void)
 #else
   /* Flush the DCache to assure that the vector data is in physical RAM */
 
-  arch_clean_dcache((uintptr_t)AM335X_VECTOR_VSRAM,
-                    (uintptr_t)AM335X_VECTOR_VSRAM + am335x_vectorsize());
+  up_clean_dcache((uintptr_t)AM335X_VECTOR_VSRAM,
+                  (uintptr_t)AM335X_VECTOR_VSRAM + am335x_vectorsize());
 #endif
 }
 

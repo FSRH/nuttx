@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated February 15, 2019)
+NuttX TODO List (Last updated March 18, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -14,9 +14,9 @@ nuttx/:
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
   (5)  Signals (sched/signal, arch/)
-  (2)  pthreads (sched/pthread)
+  (2)  pthreads (sched/pthread, libs/libc/pthread)
   (0)  Message Queues (sched/mqueue)
- (10)  Kernel/Protected Build
+  (9)  Kernel/Protected Build
   (3)  C++ Support
   (5)  Binary loaders (binfmt/)
  (18)  Network (net/, drivers/net)
@@ -804,8 +804,8 @@ o Signals (sched/signal, arch/)
                complained about it.  Apparently the visibility of the problem is
                very low.
 
-o pthreads (sched/pthreads)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^
+o pthreads (sched/pthreads libs/libc/pthread)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       PTHREAD_PRIO_PROTECT
   Description: Extend pthread_mutexattr_setprotocol().  It should support
@@ -938,15 +938,6 @@ o Kernel/Protected Build
   Status:      Open
   Priority:    Medium/High -- the kernel build configuration is not fully fielded
                yet.
-
-  Title:       NxTERM PARTITIONING.
-  Description: NxTerm is implemented (correctly) as a driver that resides
-               in the nuttx/ directory.  However, the user interfaces must be
-               moved into a NuttX library or into apps/.  Currently
-               applications calls to the NxTerm user interfaces are
-               undefined in the Kernel/Protected builds.
-  Status:      Open
-  Priority:    Medium
 
   Title:       C++ CONSTRUCTORS HAVE TOO MANY PRIVILEGES (PROTECTED MODE)
   Description: When a C++ ELF module is loaded, its C++ constructors are called
@@ -2402,11 +2393,10 @@ o Graphics Subsystem (graphics/)
   Priority:    Low
 
   Title:       AUTO-RAISE DISABLED
-  Description: Auto-raise is currently disabled in NX multi-server mode.  The
-               reason is complex:
+  Description: Auto-raise is currently disabled.  The reason is complex:
                - Most touchscreen controls send touch data a high rates
                - In multi-server mode, touch events get queued in a message
-                  queue.
+                 queue.
                - The logic that receives the messages performs the auto-raise.
                  But it can do stupid things after the first auto-raise as
                  it operates on the stale data in the message queue.
@@ -2422,25 +2412,6 @@ o Graphics Subsystem (graphics/)
                commands.
   Status:      Open
   Priority:    Low, the need has not yet arisen.
-
-  Title:       PER-WINDOW FRAMEBUFFERS
-  Description: One of the most awkward things to handle in the NX windowing
-               system is the re-draw callback.  This is difficult because it
-               requires ad hoc, custom logic to be able to do the redrawing
-               in most cases.
-
-               One solution would be to provide a per-window framebuffer.
-               All rending would be performed into the per-window framebuffer
-               and the rended bits would be copied the LCD or framebuffer
-               device memory on demand when the redraw is required.
-
-               This would (a) greatly simplify the graphics interface, (b)
-               greatly improve redraw performance, and (c) enable a more
-               generic use of the windowing.  The downside would be a large
-               usage of memory to hold all of the framebuffers, one for each
-               window.
-  Status:      Open
-  Priority:    Low, of mostly strategic value.
 
   Title:       VERTICAL ANTI-ALIASING
   Description: Anti-aliasing is implemented along the horizontal raster line
@@ -2478,6 +2449,26 @@ o Graphics Subsystem (graphics/)
                I have never encountered a hardware framebuffer with sub-byte pixel
                depth.  If such a beast ever shows up, then this priority would be
                higher.
+
+  Title:       INCOMPLATE PLANAR COLOR SUPPORT
+  Description: The original NX design included support for planar colors,
+               i.e,. for devices that provide separate framebuffers for each
+               color component.  Planar graphics hard was common some years
+               back but is rarely encountered today.  In fact, I am not aware
+               of any MCU that implements planar framebuffers.
+
+               Support for planar colors is, however, unverified and
+               incomplete.  In fact, many recent changes explicitly assume a
+               single color plane:  Planar colors are specified by a array
+               of components; some recent logic uses only component [0],
+               ignoring the possible existence of other color componet frames.
+
+               Completely removing planar color support is one reasonable
+               options; it is not likely that NuttX will encounter planar
+               color hardware and this would greatly simplify the logic and
+               eliminate inconsistencies in the immplementation.
+  Status:      Open
+  Priority:    Low.  There is no problem other than one of aesthetics.
 
 o Build system
   ^^^^^^^^^^^^

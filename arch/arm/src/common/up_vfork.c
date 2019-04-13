@@ -234,8 +234,7 @@ pid_t up_vfork(const struct vfork_s *context)
 
           /* REVISIT:  This logic is *not* common. */
 
-#if defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8) || \
-    defined(CONFIG_ARCH_CORTEXA9)
+#if defined(CONFIG_ARCH_ARMV7A)
 #  ifdef CONFIG_BUILD_KERNEL
 
           child->cmn.xcp.syscall[index].cpsr =
@@ -243,9 +242,8 @@ pid_t up_vfork(const struct vfork_s *context)
 
 #  endif
 
-#elif defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR4F) || \
-      defined(CONFIG_ARCH_CORTEXR5) || defined(CONFIG_ARCH_CORTEXR5F) || \
-      defined(CONFIG_ARCH_CORTEXR7) || defined(CONFIG_ARCH_CORTEXR7F)
+#elif defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR5) || \
+      defined(CONFIG_ARCH_CORTEXR7)
 #  ifdef CONFIG_BUILD_PROTECTED
 
           child->cmn.xcp.syscall[index].cpsr =

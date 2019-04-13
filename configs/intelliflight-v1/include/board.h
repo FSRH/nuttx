@@ -372,17 +372,15 @@
 #define BOARD_NPWM 10
 
 #define DEV_PWMLED0 "/dev/pwmled0"
-#define DEV_PWM1 1 "/dev/pwm1"
-#define DEV_PWM2 2 "/dev/pwm2"
-#define DEV_PWM3 3 "/dev/pwm3"
-#define DEV_PWM4 4 "/dev/pwm4"
-#define DEV_PWM5 5 "/dev/pwm5"
-#define DEV_PWM6 6 "/dev/pwm6"
-#define DEV_PWM7 7 "/dev/pwm7"
-#define DEV_PWM8 8 "/dev/pwm8"
-#define DEV_PWM9 9 "/dev/pwm9"
-
-static char *pwm_devices[];
+#define DEV_PWM1 "/dev/pwm1"
+#define DEV_PWM2 "/dev/pwm2"
+#define DEV_PWM3 "/dev/pwm3"
+#define DEV_PWM4 "/dev/pwm4"
+#define DEV_PWM5 "/dev/pwm5"
+#define DEV_PWM6 "/dev/pwm6"
+#define DEV_PWM7 "/dev/pwm7"
+#define DEV_PWM8 "/dev/pwm8"
+#define DEV_PWM9 "/dev/pwm9"
 
 /* SPI1: ICM20689 Gyro
  *

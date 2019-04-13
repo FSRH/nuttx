@@ -79,14 +79,7 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-ifeq ($(CONFIG_ARMV7M_DCACHE),y)
-CMN_CSRCS += arch_enable_dcache.c arch_disable_dcache.c
-CMN_CSRCS += arch_invalidate_dcache.c arch_invalidate_dcache_all.c
-ifneq ($(CONFIG_ARMV7M_DCACHE_WRITETHROUGH),y)
-CMN_CSRCS += arch_clean_dcache.c arch_clean_dcache_all.c
-CMN_CSRCS += arch_flush_dcache.c arch_flush_dcache_all.c
-endif
-endif
+CMN_CSRCS += up_cache.c
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += up_fpu.S
@@ -99,7 +92,7 @@ CHIP_ASRCS  =
 CHIP_CSRCS  = imxrt_allocateheap.c imxrt_start.c imxrt_clockconfig.c
 CHIP_CSRCS += imxrt_periphclks.c imxrt_irq.c imxrt_clrpend.c imxrt_gpio.c
 CHIP_CSRCS += imxrt_daisy.c imxrt_wdog.c imxrt_iomuxc.c imxrt_serial.c
-CHIP_CSRCS += imxrt_xbar.c imxrt_lowputc.c
+CHIP_CSRCS += imxrt_xbar.c imxrt_ocotp.c imxrt_lowputc.c
 
 # Configuration-dependent i.MX RT files
 
@@ -128,6 +121,10 @@ endif
 
 ifdef CONFIG_IMXRT_USDHC
 CHIP_CSRCS += imxrt_usdhc.c
+endif
+
+ifeq ($(CONFIG_IMXRT_LCD),y)
+CHIP_CSRCS += imxrt_lcd.c
 endif
 
 ifeq ($(CONFIG_IMXRT_SNVS_LPSRTC),y)

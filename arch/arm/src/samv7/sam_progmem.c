@@ -47,7 +47,8 @@
 #include <arch/samv7/chip.h>
 
 #include "up_arch.h"
-#include "cache.h"
+#include "barriers.h"
+
 #include "chip/sam_memorymap.h"
 
 #include "sam_progmem.h"
@@ -593,7 +594,7 @@ ssize_t up_progmem_ispageerased(size_t cluster)
   /* Flush and invalidate D-Cache for this address range */
 
   address = (cluster << SAMV7_CLUSTER_SHIFT) + SAMV7_PROGMEM_START;
-  arch_flush_dcache(address, address + SAMV7_CLUSTER_SIZE);
+  up_flush_dcache(address, address + SAMV7_CLUSTER_SIZE);
 
   /* Verify that the cluster is erased (i.e., all 0xff) */
 
@@ -731,7 +732,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 
       /* Flush the data cache to memory */
 
-      arch_clean_dcache(address, address + SAMV7_PAGE_SIZE);
+      up_clean_dcache(address, address + SAMV7_PAGE_SIZE);
 
       /* Send the write command */
 

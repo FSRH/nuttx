@@ -69,34 +69,53 @@
  *
  ************************************************************************************/
 
-void stm32_boardinitialize(void)
-{
+void stm32_boardinitialize(void) {
 #if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
     defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
     defined(CONFIG_STM32F7_SPI5)
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spidev_initialize() has been brought into the link.
-   */
+	/*
+	 * Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+	 * stm32_spidev_initialize() has been brought into the link.
+	 */
 
-  if (stm32_spidev_initialize)
-    {
-      stm32_spidev_initialize();
-    }
+	if (stm32_spidev_initialize) {
+		stm32_spidev_initialize();
+	}
 #endif
 
 #ifdef CONFIG_SPORADIC_INSTRUMENTATION
-  /* This configuration has been used for evaluating the NuttX sporadic scheduler.
-   * The following caqll initializes the sporadic scheduler monitor.
-   */
+	/*
+	 * This configuration has been used for evaluating the NuttX sporadic scheduler.
+	 * The following caqll initializes the sporadic scheduler monitor.
+	 */
 
-  arch_sporadic_initialize();
+	arch_sporadic_initialize();
 #endif
 
 #ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected. */
+	/* Configure on-board LEDs if LED support has been selected. */
 
-  board_autoled_initialize();
+	board_autoled_initialize();
 #endif
+
+#ifdef CONFIG_PWM
+	/* Initialize PWM and register the PWM device. */
+
+	int ret = stm32_pwm_setup();
+	if (ret < 0) {
+		syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+	}
+#endif
+
+//#ifdef CONFIG_CAN
+//	/* Initialize CAN and register the CAN driver. */
+//
+//	ret = stm32_can_setup();
+//	if (ret < 0) {
+//		syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
+//	}
+//#endif
+
 }
 
 /************************************************************************************
@@ -116,12 +135,12 @@ void stm32_boardinitialize(void)
 void board_initialize(void)
 {
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
-  /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in user-space
-   * but the initialization function must run in kernel space.
-   */
+	/* Perform NSH initialization here instead of from the NSH.  This
+	 * alternative NSH initialization is necessary when NSH is ran in user-space
+	 * but the initialization function must run in kernel space.
+	 */
 
-  (void)board_app_initialize(0);
+	(void)board_app_initialize(0);
 #endif
 }
 #endif
