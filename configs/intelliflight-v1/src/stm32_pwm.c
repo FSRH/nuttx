@@ -21,7 +21,7 @@
 
 #include "chip.h"
 #include "up_arch.h"
-#include <stm32/stm32_pwm.h>
+#include <stm32_pwm.h>
 
 #include "intelliflight-v1.h"
 
@@ -30,13 +30,6 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration *******************************************************************/
-/* PWM
- *
- * The STM3240G-Eval has no real on-board PWM devices, but the board can be
- * configured to output a pulse train using variously unused pins on the board for
- * PWM output (see board.h for details of pins).
- */
 
 /************************************************************************************
  * Public Functions
@@ -58,14 +51,8 @@ int stm32_pwm_setup(void) {
 	/* Have we already initialized? */
 
 	if (!initialized) {
-		/* Call stm32l4_pwminitialize() to get an instance of the PWM interface */
+		/* Call stm32_pwminitialize() to get an instance of the PWM interface */
 
-		/* PWM
-		 *
-		 * The Nucleo-l476rg has no real on-board PWM devices, but the board can be
-		 * configured to output a pulse train using TIM1 or 8, or others (see board.h).
-		 * Let's figure out which the user has configured.
-		 */
 
 #if defined(CONFIG_STM32F7_TIM1_PWM)
 #if defined(CONFIG_STM32F7_TIM1_CH1OUT)

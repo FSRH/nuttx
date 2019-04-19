@@ -70,6 +70,7 @@
  ************************************************************************************/
 
 void stm32_boardinitialize(void) {
+	int ret = 0;
 #if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
     defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
     defined(CONFIG_STM32F7_SPI5)
@@ -101,7 +102,7 @@ void stm32_boardinitialize(void) {
 #ifdef CONFIG_DEV_GPIO
 	/* Initialize GPIO and register the GPIO device drivers. */
 
-	int ret = stm32_gpio_initialize();
+	ret = stm32_gpio_initialize();
 	if (ret < 0) {
 		syslog(LOG_ERR, "ERROR: Failed to initialize GPIO Driver: %d\n", ret);
 	}
@@ -110,7 +111,7 @@ void stm32_boardinitialize(void) {
 #ifdef CONFIG_PWM
 	/* Initialize PWM and register the PWM device. */
 
-	int ret = stm32_pwm_setup();
+	ret = stm32_pwm_setup();
 	if (ret < 0) {
 		syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
 	}

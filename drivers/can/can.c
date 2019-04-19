@@ -116,7 +116,7 @@
 
 /* Semaphore helpers */
 
-static int            can_takesem(FAR sem_t *sem);
+static int can_takesem(FAR sem_t *sem);
 
 /* Poll helpers */
 
@@ -127,7 +127,7 @@ static void           can_pollnotify(FAR struct can_dev_s *dev,
 
 /* CAN helpers */
 
-static uint8_t        can_dlc2bytes(uint8_t dlc);
+static uint8_t can_dlc2bytes(uint8_t dlc);
 #if 0 /* Not used */
 static uint8_t        can_bytes2dlc(uint8_t nbytes);
 #endif
@@ -137,17 +137,17 @@ static void           can_txready_work(FAR void *arg);
 
 /* Character driver methods */
 
-static int            can_open(FAR struct file *filep);
-static int            can_close(FAR struct file *filep);
-static ssize_t        can_read(FAR struct file *filep, FAR char *buffer,
-                               size_t buflen);
-static int            can_xmit(FAR struct can_dev_s *dev);
-static ssize_t        can_write(FAR struct file *filep,
-                                FAR const char *buffer, size_t buflen);
+static int can_open(FAR struct file *filep);
+static int can_close(FAR struct file *filep);
+static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
+		size_t buflen);
+static int can_xmit(FAR struct can_dev_s *dev);
+static ssize_t can_write(FAR struct file *filep,
+		FAR const char *buffer, size_t buflen);
 static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
-                                  FAR struct canioc_rtr_s *rtr);
-static int            can_ioctl(FAR struct file *filep, int cmd,
-                                unsigned long arg);
+		FAR struct canioc_rtr_s *rtr);
+static int can_ioctl(FAR struct file *filep, int cmd,
+		unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
 static int            can_poll(FAR struct file *filep, FAR struct pollfd *fds,
                                bool setup);
@@ -158,20 +158,20 @@ static int            can_poll(FAR struct file *filep, FAR struct pollfd *fds,
  ****************************************************************************/
 
 static const struct file_operations g_canops =
-{
-  can_open,  /* open */
-  can_close, /* close */
-  can_read,  /* read */
-  can_write, /* write */
-  NULL,      /* seek */
-  can_ioctl  /* ioctl */
+		{
+				can_open, /* open */
+				can_close, /* close */
+				can_read, /* read */
+				can_write, /* write */
+				NULL, /* seek */
+				can_ioctl /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , can_poll /* poll */
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL     /* unlink */
+				, NULL /* unlink */
 #endif
-};
+		};
 
 /****************************************************************************
  * Private Functions
@@ -183,18 +183,18 @@ static const struct file_operations g_canops =
 
 static int can_takesem(FAR sem_t *sem)
 {
-  int ret;
+	int ret;
 
-  /* Take a count from the semaphore, possibly waiting */
+	/* Take a count from the semaphore, possibly waiting */
 
-  ret = nxsem_wait(sem);
+	ret = nxsem_wait(sem);
 
-  /* The only case that an error should occur here is if the wait
-   * was awakened by a signal
-   */
+	/* The only case that an error should occur here is if the wait
+	 * was awakened by a signal
+	 */
 
-  DEBUGASSERT(ret == OK || ret == -EINTR);
-  return ret;
+	DEBUGASSERT(ret == OK || ret == -EINTR);
+	return ret;
 }
 
 /****************************************************************************
@@ -251,8 +251,8 @@ static void can_pollnotify(FAR struct can_dev_s *dev, pollevent_t eventset)
 
 static uint8_t can_dlc2bytes(uint8_t dlc)
 {
-  if (dlc > 8)
-    {
+	if (dlc > 8)
+			{
 #ifdef CONFIG_CAN_FD
       switch (dlc)
         {
@@ -279,11 +279,11 @@ static uint8_t can_dlc2bytes(uint8_t dlc)
             return 64;
         }
 #else
-      return 8;
+		return 8;
 #endif
-    }
+	}
 
-  return dlc;
+	return dlc;
 }
 
 /****************************************************************************
@@ -404,16 +404,16 @@ static void can_txready_work(FAR void *arg)
 
 static FAR struct can_reader_s *init_can_reader(FAR struct file *filep)
 {
-  FAR struct can_reader_s *reader = kmm_zalloc(sizeof(struct can_reader_s));
-  DEBUGASSERT(reader != NULL);
+	FAR struct can_reader_s *reader = kmm_zalloc(sizeof(struct can_reader_s));
+	DEBUGASSERT(reader != NULL);
 
-  reader->fifo.rx_head  = 0;
-  reader->fifo.rx_tail  = 0;
+	reader->fifo.rx_head = 0;
+	reader->fifo.rx_tail = 0;
 
-  nxsem_init(&reader->fifo.rx_sem, 0, 1);
-  reader->filep = filep;
+	nxsem_init(&reader->fifo.rx_sem, 0, 1);
+	reader->filep = filep;
 
-  return reader;
+	return reader;
 }
 
 /****************************************************************************
@@ -426,80 +426,80 @@ static FAR struct can_reader_s *init_can_reader(FAR struct file *filep)
 
 static int can_open(FAR struct file *filep)
 {
-  FAR struct inode     *inode = filep->f_inode;
-  FAR struct can_dev_s *dev   = inode->i_private;
-  uint8_t               tmp;
-  int                   ret;
+	FAR struct inode *inode = filep->f_inode;
+	FAR struct can_dev_s *dev = inode->i_private;
+	uint8_t tmp;
+	int ret;
 
-  caninfo("ocount: %d\n", dev->cd_ocount);
+	caninfo ("ocount: %d\n", dev->cd_ocount);
 
-  /* If the port is the middle of closing, wait until the close is finished */
+	/* If the port is the middle of closing, wait until the close is finished */
 
-  ret = can_takesem(&dev->cd_closesem);
-  if (ret < 0)
-    {
-      return ret;
-    }
+	ret = can_takesem(&dev->cd_closesem);
+	if (ret < 0)
+			{
+		return ret;
+	}
 
-  /* Increment the count of references to the device.  If this is the first
-   * time that the driver has been opened for this device, then initialize
-   * the device.
-   */
+	/* Increment the count of references to the device.  If this is the first
+	 * time that the driver has been opened for this device, then initialize
+	 * the device.
+	 */
 
-  tmp = dev->cd_ocount + 1;
-  if (tmp == 0)
-    {
-      /* More than 255 opens; uint8_t overflows to zero */
+	tmp = dev->cd_ocount + 1;
+	if (tmp == 0)
+			{
+		/* More than 255 opens; uint8_t overflows to zero */
 
-      ret = -EMFILE;
-    }
-  else
-    {
-      /* Check if this is the first time that the driver has been opened. */
+		ret = -EMFILE;
+	}
+	else
+	{
+		/* Check if this is the first time that the driver has been opened. */
 
-      if (tmp == 1)
-        {
-          /* Yes.. perform one time hardware initialization. */
+		if (tmp == 1)
+				{
+			/* Yes.. perform one time hardware initialization. */
 
-          irqstate_t flags = enter_critical_section();
-          ret = dev_setup(dev);
-          if (ret >= 0)
-            {
-              /* Mark the FIFOs empty */
+			irqstate_t flags = enter_critical_section();
+			ret = dev_setup(dev);
+			if (ret >= 0)
+					{
+				/* Mark the FIFOs empty */
 
-              dev->cd_xmit.tx_head  = 0;
-              dev->cd_xmit.tx_queue = 0;
-              dev->cd_xmit.tx_tail  = 0;
+				dev->cd_xmit.tx_head = 0;
+				dev->cd_xmit.tx_queue = 0;
+				dev->cd_xmit.tx_tail = 0;
 
-              /* Finally, Enable the CAN RX interrupt */
+				/* Finally, Enable the CAN RX interrupt */
 
-              dev_rxint(dev, true);
+				dev_rxint(dev, true);
 
-              /* Save the new open count only on success */
+				/* Save the new open count only on success */
 
-              dev->cd_ocount = 1;
+				dev->cd_ocount = 1;
 
-              list_initialize(&dev->cd_readers);
-            }
+				list_initialize(&dev->cd_readers);
+			}
 
-          leave_critical_section(flags);
-        }
-      else
-        {
-          /* Save the incremented open count */
+			leave_critical_section(flags);
+		}
+		else
+		{
+			/* Save the incremented open count */
 
-          dev->cd_ocount = tmp;
-        }
+			dev->cd_ocount = tmp;
+		}
 
-    irqstate_t flags = enter_critical_section();
-    list_add_head(&dev->cd_readers,
-                  (FAR struct list_node *)init_can_reader(filep));
+		irqstate_t flags = enter_critical_section();
+		list_add_head(&dev->cd_readers,
+				(FAR struct list_node *) init_can_reader(filep));
 
-    leave_critical_section(flags);
-    }
+		leave_critical_section(flags);
+	}
 
-  can_givesem(&dev->cd_closesem);
-  return ret;
+	can_givesem(&dev->cd_closesem);
+	return ret;
 }
 
 /****************************************************************************
@@ -513,80 +513,80 @@ static int can_open(FAR struct file *filep)
 
 static int can_close(FAR struct file *filep)
 {
-  FAR struct inode     *inode = filep->f_inode;
-  FAR struct can_dev_s *dev   = inode->i_private;
-  irqstate_t            flags;
-  FAR struct list_node *node;
-  FAR struct list_node *tmp;
-  int                   ret;
+	FAR struct inode *inode = filep->f_inode;
+	FAR struct can_dev_s *dev = inode->i_private;
+	irqstate_t flags;
+	FAR struct list_node *node;
+	FAR struct list_node *tmp;
+	int ret;
 
-  caninfo("ocount: %d\n", dev->cd_ocount);
+	caninfo ("ocount: %d\n", dev->cd_ocount);
 
-  ret = can_takesem(&dev->cd_closesem);
-  if (ret < 0)
-    {
-      return ret;
-    }
+	ret = can_takesem(&dev->cd_closesem);
+	if (ret < 0)
+			{
+		return ret;
+	}
 
-  list_for_every_safe(&dev->cd_readers, node, tmp)
-    {
-      if (((FAR struct can_reader_s *)node)->filep == filep)
-        {
-          list_delete(node);
-          kmm_free(node);
-          break;
-        }
-    }
+	list_for_every_safe(&dev->cd_readers, node, tmp)
+	{
+		if (((FAR struct can_reader_s *) node)->filep == filep)
+				{
+			list_delete(node);
+			kmm_free(node);
+			break;
+		}
+	}
 
-  /* Decrement the references to the driver.  If the reference count will
-   * decrement to 0, then uninitialize the driver.
-   */
+	/* Decrement the references to the driver.  If the reference count will
+	 * decrement to 0, then uninitialize the driver.
+	 */
 
-  if (dev->cd_ocount > 1)
-    {
-      dev->cd_ocount--;
-      goto errout;
-    }
+	if (dev->cd_ocount > 1)
+			{
+		dev->cd_ocount--;
+		goto errout;
+	}
 
-  /* There are no more references to the port */
+	/* There are no more references to the port */
 
-  dev->cd_ocount = 0;
+	dev->cd_ocount = 0;
 
-  /* Stop accepting input */
+	/* Stop accepting input */
 
-  dev_rxint(dev, false);
+	dev_rxint(dev, false);
 
-  /* Now we wait for the transmit FIFO to clear */
+	/* Now we wait for the transmit FIFO to clear */
 
-  while (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
-    {
+	while (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
+	{
 #ifndef CONFIG_DISABLE_SIGNALS
-       nxsig_usleep(HALF_SECOND_USEC);
+		nxsig_usleep(HALF_SECOND_USEC);
 #else
        up_mdelay(HALF_SECOND_MSEC);
 #endif
-    }
+	}
 
-  /* And wait for the TX hardware FIFO to drain */
+	/* And wait for the TX hardware FIFO to drain */
 
-  while (!dev_txempty(dev))
-    {
+	while (!dev_txempty(dev))
+	{
 #ifndef CONFIG_DISABLE_SIGNALS
-      nxsig_usleep(HALF_SECOND_USEC);
+		nxsig_usleep(HALF_SECOND_USEC);
 #else
       up_mdelay(HALF_SECOND_MSEC);
 #endif
-    }
+	}
 
-  /* Free the IRQ and disable the CAN device */
+	/* Free the IRQ and disable the CAN device */
 
-  flags = enter_critical_section(); /* Disable interrupts */
-  dev_shutdown(dev);                /* Disable the CAN */
-  leave_critical_section(flags);
+	flags = enter_critical_section(); /* Disable interrupts */
+	dev_shutdown(dev); /* Disable the CAN */
+	leave_critical_section(flags);
 
-errout:
-  can_givesem(&dev->cd_closesem);
-  return ret;
+	errout:
+	can_givesem(&dev->cd_closesem);
+	return ret;
 }
 
 /****************************************************************************
@@ -598,146 +598,146 @@ errout:
  ****************************************************************************/
 
 static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
-                        size_t buflen)
+		size_t buflen)
 {
-  FAR struct inode         *inode = filep->f_inode;
-  FAR struct can_dev_s     *dev = inode->i_private;
-  FAR sstruct can_reader_s *reader = NULL;
-  FAR sstruct list_node    *node;
-  FAR sstruct can_rxfifo_s *fifo;
-  size_t                    nread;
-  irqstate_t                flags;
-  int                       ret = 0;
+	FAR struct inode *inode = filep->f_inode;
+	FAR struct can_dev_s *dev = inode->i_private;
+	FAR struct can_reader_s *reader = NULL;
+	FAR struct list_node *node;
+	FAR struct can_rxfifo_s *fifo;
+	size_t nread;
+	irqstate_t flags;
+	int ret = 0;
 
-  caninfo("buflen: %d\n", buflen);
+	caninfo ("buflen: %d\n", buflen);
 
-  /* The caller must provide enough memory to catch the smallest possible
-   * message.  This is not a system error condition, but we won't permit
-   * it,  Hence we return 0.
-   */
+	/* The caller must provide enough memory to catch the smallest possible
+	 * message.  This is not a system error condition, but we won't permit
+	 * it,  Hence we return 0.
+	 */
 
-  if (buflen >= CAN_MSGLEN(0))
-    {
-      /* Interrupts must be disabled while accessing the cd_recv FIFO */
+	if (buflen >= CAN_MSGLEN(0))
+	{
+		/* Interrupts must be disabled while accessing the cd_recv FIFO */
 
-      flags = enter_critical_section();
+		flags = enter_critical_section();
 
 #ifdef CONFIG_CAN_ERRORS
-      /* Check for internal errors */
+		/* Check for internal errors */
 
-      if (dev->cd_error != 0)
-        {
-          FAR struct can_msg_s *msg;
+		if (dev->cd_error != 0)
+		{
+			FAR struct can_msg_s *msg;
 
-          /* Detected an internal driver error.  Generate a
-           * CAN_ERROR_MESSAGE
-           */
+			/* Detected an internal driver error.  Generate a
+			 * CAN_ERROR_MESSAGE
+			 */
 
-          if (buflen < CAN_MSGLEN(CAN_ERROR_DLC))
-            {
-              goto return_with_irqdisabled;
-            }
+			if (buflen < CAN_MSGLEN(CAN_ERROR_DLC))
+			{
+				goto return_with_irqdisabled;
+			}
 
-          msg                   = (FAR struct can_msg_s *)buffer;
-          msg->cm_hdr.ch_id     = CAN_ERROR_INTERNAL;
-          msg->cm_hdr.ch_dlc    = CAN_ERROR_DLC;
-          msg->cm_hdr.ch_rtr    = 0;
-          msg->cm_hdr.ch_error  = 1;
+			msg = (FAR struct can_msg_s *)buffer;
+			msg->cm_hdr.ch_id = CAN_ERROR_INTERNAL;
+			msg->cm_hdr.ch_dlc = CAN_ERROR_DLC;
+			msg->cm_hdr.ch_rtr = 0;
+			msg->cm_hdr.ch_error = 1;
 #ifdef CONFIG_CAN_EXTID
-          msg->cm_hdr.ch_extid  = 0;
+			msg->cm_hdr.ch_extid = 0;
 #endif
-          msg->cm_hdr.ch_unused = 0;
-          memset(&(msg->cm_data), 0, CAN_ERROR_DLC);
-          msg->cm_data[5]       = dev->cd_error;
+			msg->cm_hdr.ch_unused = 0;
+			memset(&(msg->cm_data), 0, CAN_ERROR_DLC);
+			msg->cm_data[5] = dev->cd_error;
 
-          /* Reset the error flag */
+			/* Reset the error flag */
 
-          dev->cd_error         = 0;
+			dev->cd_error = 0;
 
-          ret = CAN_MSGLEN(CAN_ERROR_DLC);
-          goto return_with_irqdisabled;
-        }
+			ret = CAN_MSGLEN(CAN_ERROR_DLC);
+			goto return_with_irqdisabled;
+		}
 #endif /* CONFIG_CAN_ERRORS */
 
-      list_for_every(&dev->cd_readers, node)
-        {
-          if (((FAR struct can_reader_s *) node)->filep == filep)
-            {
-              reader = (FAR struct can_reader_s *)node;
-              break;
-            }
-        }
+		list_for_every(&dev->cd_readers, node)
+		{
+			if (((FAR struct can_reader_s *) node)->filep == filep)
+					{
+				reader = (FAR struct can_reader_s *) node;
+				break;
+			}
+		}
 
-      DEBUGASSERT(reader != NULL);
+		DEBUGASSERT(reader != NULL);
 
-      fifo = &reader->fifo;
+		fifo = &reader->fifo;
 
-      while (fifo->rx_head == fifo->rx_tail)
-        {
-          /* The receive FIFO is empty -- was non-blocking mode selected? */
+		while (fifo->rx_head == fifo->rx_tail)
+		{
+			/* The receive FIFO is empty -- was non-blocking mode selected? */
 
-          if (filep->f_oflags & O_NONBLOCK)
-            {
-              ret = -EAGAIN;
-              goto return_with_irqdisabled;
-            }
+			if (filep->f_oflags & O_NONBLOCK)
+			{
+				ret = -EAGAIN;
+				goto return_with_irqdisabled;
+			}
 
-          /* Wait for a message to be received */
+			/* Wait for a message to be received */
 
-          DEBUGASSERT(dev->cd_nrxwaiters < 255);
-          dev->cd_nrxwaiters++;
-          ret = can_takesem(&fifo->rx_sem);
-          dev->cd_nrxwaiters--;
+			DEBUGASSERT(dev->cd_nrxwaiters < 255);
+			dev->cd_nrxwaiters++;
+			ret = can_takesem(&fifo->rx_sem);
+			dev->cd_nrxwaiters--;
 
-          if (ret < 0)
-            {
-              goto return_with_irqdisabled;
-            }
-        }
+			if (ret < 0)
+					{
+				goto return_with_irqdisabled;
+			}
+		}
 
-      /* The cd_recv FIFO is not empty.  Copy all buffered data that will fit
-       * in the user buffer.
-       */
+		/* The cd_recv FIFO is not empty.  Copy all buffered data that will fit
+		 * in the user buffer.
+		 */
 
-    nread = 0;
-    do
-      {
-        /* Will the next message in the FIFO fit into the user buffer? */
+		nread = 0;
+		do
+		{
+			/* Will the next message in the FIFO fit into the user buffer? */
 
-        FAR struct can_msg_s *msg = &fifo->rx_buffer[fifo->rx_head];
-        int nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
-        int msglen = CAN_MSGLEN(nbytes);
+			FAR struct can_msg_s *msg = &fifo->rx_buffer[fifo->rx_head];
+			int nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
+			int msglen = CAN_MSGLEN(nbytes);
 
-        if (nread + msglen > buflen)
-          {
-            break;
-          }
+			if (nread + msglen > buflen)
+					{
+				break;
+			}
 
-        /* Copy the message to the user buffer */
+			/* Copy the message to the user buffer */
 
-        memcpy(&buffer[nread], msg, msglen);
-        nread += msglen;
+			memcpy(&buffer[nread], msg, msglen);
+			nread += msglen;
 
-        /* Increment the head of the circular message buffer */
+			/* Increment the head of the circular message buffer */
 
-        if (++fifo->rx_head >= CONFIG_CAN_FIFOSIZE)
-          {
-            fifo->rx_head = 0;
-          }
-        }
-      while (fifo->rx_head != fifo->rx_tail);
+			if (++fifo->rx_head >= CONFIG_CAN_FIFOSIZE)
+			{
+				fifo->rx_head = 0;
+			}
+		}
+		while (fifo->rx_head != fifo->rx_tail);
 
-      /* All on the messages have bee transferred.  Return the number of bytes
-       * that were read.
-       */
+		/* All on the messages have bee transferred.  Return the number of bytes
+		 * that were read.
+		 */
 
-      ret = nread;
+		ret = nread;
 
-return_with_irqdisabled:
-      leave_critical_section(flags);
-    }
+		return_with_irqdisabled:
+		leave_critical_section(flags);
+	}
 
-  return ret;
+	return ret;
 }
 
 /****************************************************************************
@@ -753,72 +753,72 @@ return_with_irqdisabled:
 
 static int can_xmit(FAR struct can_dev_s *dev)
 {
-  int tmpndx;
-  int ret = -EBUSY;
+	int tmpndx;
+	int ret = -EBUSY;
 
-  caninfo("xmit head: %d queue: %d tail: %d\n",
-          dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail);
+	caninfo ("xmit head: %d queue: %d tail: %d\n",
+			dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail);
 
-  /* If there is nothing to send, then just disable interrupts and return */
+	/* If there is nothing to send, then just disable interrupts and return */
 
-  if (dev->cd_xmit.tx_head == dev->cd_xmit.tx_tail)
-    {
-      DEBUGASSERT(dev->cd_xmit.tx_queue == dev->cd_xmit.tx_head);
+	if (dev->cd_xmit.tx_head == dev->cd_xmit.tx_tail)
+			{
+		DEBUGASSERT(dev->cd_xmit.tx_queue == dev->cd_xmit.tx_head);
 
 #ifndef CONFIG_CAN_TXREADY
-      /* We can disable CAN TX interrupts -- unless there is a H/W FIFO.  In
-       * that case, TX interrupts must stay enabled until the H/W FIFO is
-       * fully emptied.
-       */
+		/* We can disable CAN TX interrupts -- unless there is a H/W FIFO.  In
+		 * that case, TX interrupts must stay enabled until the H/W FIFO is
+		 * fully emptied.
+		 */
 
-      dev_txint(dev, false);
+		dev_txint(dev, false);
 #endif
-      return -EIO;
-    }
+		return -EIO;
+	}
 
-  /* Check if we have already queued all of the data in the TX fifo.
-   *
-   * tx_tail:  Incremented in can_write each time a message is queued in the
-   *           FIFO
-   * tx_head:  Incremented in can_txdone each time a message completes
-   * tx_queue: Incremented each time that a message is sent to the hardware.
-   *
-   * Logically (ignoring buffer wrap-around): tx_head <= tx_queue <= tx_tail
-   * tx_head == tx_queue == tx_tail means that the FIFO is empty
-   * tx_head < tx_queue == tx_tail means that all data has been queued, but
-   * we are still waiting for transmissions to complete.
-   */
+	/* Check if we have already queued all of the data in the TX fifo.
+	 *
+	 * tx_tail:  Incremented in can_write each time a message is queued in the
+	 *           FIFO
+	 * tx_head:  Incremented in can_txdone each time a message completes
+	 * tx_queue: Incremented each time that a message is sent to the hardware.
+	 *
+	 * Logically (ignoring buffer wrap-around): tx_head <= tx_queue <= tx_tail
+	 * tx_head == tx_queue == tx_tail means that the FIFO is empty
+	 * tx_head < tx_queue == tx_tail means that all data has been queued, but
+	 * we are still waiting for transmissions to complete.
+	 */
 
-  while (dev->cd_xmit.tx_queue != dev->cd_xmit.tx_tail && dev_txready(dev))
-    {
-      /* No.. The FIFO should not be empty in this case */
+	while (dev->cd_xmit.tx_queue != dev->cd_xmit.tx_tail && dev_txready(dev))
+	{
+		/* No.. The FIFO should not be empty in this case */
 
-      DEBUGASSERT(dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail);
+		DEBUGASSERT(dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail);
 
-      /* Increment the FIFO queue index before sending (because dev_send()
-       * might call can_txdone()).
-       */
+		/* Increment the FIFO queue index before sending (because dev_send()
+		 * might call can_txdone()).
+		 */
 
-      tmpndx = dev->cd_xmit.tx_queue;
-      if (++dev->cd_xmit.tx_queue >= CONFIG_CAN_FIFOSIZE)
-        {
-          dev->cd_xmit.tx_queue = 0;
-        }
+		tmpndx = dev->cd_xmit.tx_queue;
+		if (++dev->cd_xmit.tx_queue >= CONFIG_CAN_FIFOSIZE)
+		{
+			dev->cd_xmit.tx_queue = 0;
+		}
 
-      /* Send the next message at the FIFO queue index */
+		/* Send the next message at the FIFO queue index */
 
-      ret = dev_send(dev, &dev->cd_xmit.tx_buffer[tmpndx]);
-      if (ret < 0)
-        {
-          canerr("dev_send failed: %d\n", ret);
-          break;
-        }
-    }
+		ret = dev_send(dev, &dev->cd_xmit.tx_buffer[tmpndx]);
+		if (ret < 0)
+				{
+			canerr ("dev_send failed: %d\n", ret);
+			break;
+		}
+	}
 
-  /* Make sure that TX interrupts are enabled */
+	/* Make sure that TX interrupts are enabled */
 
-  dev_txint(dev, true);
-  return ret;
+	dev_txint(dev, true);
+	return ret;
 }
 
 /****************************************************************************
@@ -826,130 +826,130 @@ static int can_xmit(FAR struct can_dev_s *dev)
  ****************************************************************************/
 
 static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
-                         size_t buflen)
+		size_t buflen)
 {
-  FAR struct inode        *inode = filep->f_inode;
-  FAR struct can_dev_s    *dev   = inode->i_private;
-  FAR struct can_txfifo_s *fifo  = &dev->cd_xmit;
-  FAR struct can_msg_s    *msg;
-  bool                     inactive;
-  ssize_t                  nsent = 0;
-  irqstate_t               flags;
-  int                      nexttail;
-  int                      nbytes;
-  int                      msglen;
-  int                      ret   = 0;
+	FAR struct inode *inode = filep->f_inode;
+	FAR struct can_dev_s *dev = inode->i_private;
+	FAR struct can_txfifo_s *fifo = &dev->cd_xmit;
+	FAR struct can_msg_s *msg;
+	bool inactive;
+	ssize_t nsent = 0;
+	irqstate_t flags;
+	int nexttail;
+	int nbytes;
+	int msglen;
+	int ret = 0;
 
-  caninfo("buflen: %d\n", buflen);
+	caninfo ("buflen: %d\n", buflen);
 
-  /* Interrupts must disabled throughout the following */
+	/* Interrupts must disabled throughout the following */
 
-  flags = enter_critical_section();
+	flags = enter_critical_section();
 
-  /* Check if the TX is inactive when we started. In certain race conditions,
-   * there may be a pending interrupt to kick things back off, but we will
-   * be sure here that there is not.  That the hardware is IDLE and will
-   * need to be kick-started.
-   */
+	/* Check if the TX is inactive when we started. In certain race conditions,
+	 * there may be a pending interrupt to kick things back off, but we will
+	 * be sure here that there is not.  That the hardware is IDLE and will
+	 * need to be kick-started.
+	 */
 
-  inactive = dev_txempty(dev);
+	inactive = dev_txempty(dev);
 
-  /* Add the messages to the FIFO.  Ignore any trailing messages that are
-   * shorter than the minimum.
-   */
+	/* Add the messages to the FIFO.  Ignore any trailing messages that are
+	 * shorter than the minimum.
+	 */
 
-  while ((buflen - nsent) >= CAN_MSGLEN(0))
-    {
-      /* Check if adding this new message would over-run the drivers ability
-       * to enqueue xmit data.
-       */
+	while ((buflen - nsent) >= CAN_MSGLEN(0))
+	{
+		/* Check if adding this new message would over-run the drivers ability
+		 * to enqueue xmit data.
+		 */
 
-      nexttail = fifo->tx_tail + 1;
-      if (nexttail >= CONFIG_CAN_FIFOSIZE)
-        {
-          nexttail = 0;
-        }
+		nexttail = fifo->tx_tail + 1;
+		if (nexttail >= CONFIG_CAN_FIFOSIZE)
+		{
+			nexttail = 0;
+		}
 
-      /* If the XMIT FIFO becomes full, then wait for space to become available */
+		/* If the XMIT FIFO becomes full, then wait for space to become available */
 
-      while (nexttail == fifo->tx_head)
-        {
-          /* The transmit FIFO is full  -- was non-blocking mode selected? */
+		while (nexttail == fifo->tx_head)
+		{
+			/* The transmit FIFO is full  -- was non-blocking mode selected? */
 
-          if ((filep->f_oflags & O_NONBLOCK) != 0)
-            {
-              if (nsent == 0)
-                {
-                  ret = -EAGAIN;
-                }
-              else
-                {
-                  ret = nsent;
-                }
+			if ((filep->f_oflags & O_NONBLOCK) != 0)
+					{
+				if (nsent == 0)
+						{
+					ret = -EAGAIN;
+				}
+				else
+				{
+					ret = nsent;
+				}
 
-              goto return_with_irqdisabled;
-            }
+				goto return_with_irqdisabled;
+			}
 
-          /* If the TX hardware was inactive when we started, then we will
-           * have start the XMIT sequence generate the TX done interrupts
-           * needed to clear the FIFO.
-           */
+			/* If the TX hardware was inactive when we started, then we will
+			 * have start the XMIT sequence generate the TX done interrupts
+			 * needed to clear the FIFO.
+			 */
 
-          if (inactive)
-            {
-              (void)can_xmit(dev);
-            }
+			if (inactive)
+			{
+				(void) can_xmit(dev);
+			}
 
-          /* Wait for a message to be sent */
+			/* Wait for a message to be sent */
 
-          DEBUGASSERT(dev->cd_ntxwaiters < 255);
-          dev->cd_ntxwaiters++;
-          ret = can_takesem(&fifo->tx_sem);
-          dev->cd_ntxwaiters--;
-          if (ret < 0)
-            {
-              goto return_with_irqdisabled;
-            }
+			DEBUGASSERT(dev->cd_ntxwaiters < 255);
+			dev->cd_ntxwaiters++;
+			ret = can_takesem(&fifo->tx_sem);
+			dev->cd_ntxwaiters--;
+			if (ret < 0)
+					{
+				goto return_with_irqdisabled;
+			}
 
-          /* Re-check the FIFO state */
+			/* Re-check the FIFO state */
 
-          inactive = dev_txempty(dev);
-        }
+			inactive = dev_txempty(dev);
+		}
 
-      /* We get here if there is space at the end of the FIFO.  Add the new
-       * CAN message at the tail of the FIFO.
-       */
+		/* We get here if there is space at the end of the FIFO.  Add the new
+		 * CAN message at the tail of the FIFO.
+		 */
 
-      msg    = (FAR struct can_msg_s *)&buffer[nsent];
-      nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
-      msglen = CAN_MSGLEN(nbytes);
-      memcpy(&fifo->tx_buffer[fifo->tx_tail], msg, msglen);
+		msg = (FAR struct can_msg_s *) &buffer[nsent];
+		nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
+		msglen = CAN_MSGLEN(nbytes);
+		memcpy(&fifo->tx_buffer[fifo->tx_tail], msg, msglen);
 
-      /* Increment the tail of the circular buffer */
+		/* Increment the tail of the circular buffer */
 
-      fifo->tx_tail = nexttail;
+		fifo->tx_tail = nexttail;
 
-      /* Increment the number of bytes that were sent */
+		/* Increment the number of bytes that were sent */
 
-      nsent += msglen;
-    }
+		nsent += msglen;
+	}
 
-  /* We get here after all messages have been added to the FIFO.  Check if
-   * we need to kick off the XMIT sequence.
-   */
+	/* We get here after all messages have been added to the FIFO.  Check if
+	 * we need to kick off the XMIT sequence.
+	 */
 
-  if (inactive)
-    {
-      (void)can_xmit(dev);
-    }
+	if (inactive)
+	{
+		(void) can_xmit(dev);
+	}
 
-  /* Return the number of bytes that were sent */
+	/* Return the number of bytes that were sent */
 
-  ret = nsent;
+	ret = nsent;
 
-return_with_irqdisabled:
-  leave_critical_section(flags);
-  return ret;
+	return_with_irqdisabled:
+	leave_critical_section(flags);
+	return ret;
 }
 
 /****************************************************************************
@@ -964,47 +964,47 @@ return_with_irqdisabled:
  ****************************************************************************/
 
 static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
-                                  FAR struct canioc_rtr_s *rtr)
+		FAR struct canioc_rtr_s *rtr)
 {
-  FAR struct can_rtrwait_s *wait = NULL;
-  irqstate_t                flags;
-  int                       i;
-  int                       ret = -ENOMEM;
+	FAR struct can_rtrwait_s *wait = NULL;
+	irqstate_t flags;
+	int i;
+	int ret = -ENOMEM;
 
-  /* Disable interrupts through this operation */
+	/* Disable interrupts through this operation */
 
-  flags = enter_critical_section();
+	flags = enter_critical_section();
 
-  /* Find an available slot in the pending RTR list */
+	/* Find an available slot in the pending RTR list */
 
-  for (i = 0; i < CONFIG_CAN_NPENDINGRTR; i++)
-    {
-      FAR struct can_rtrwait_s *tmp = &dev->cd_rtr[i];
-      if (!rtr->ci_msg)
-        {
-          tmp->cr_id  = rtr->ci_id;
-          tmp->cr_msg = rtr->ci_msg;
-          dev->cd_npendrtr++;
-          wait        = tmp;
-          break;
-        }
-    }
+	for (i = 0; i < CONFIG_CAN_NPENDINGRTR; i++)
+			{
+		FAR struct can_rtrwait_s *tmp = &dev->cd_rtr[i];
+		if (!rtr->ci_msg)
+		{
+			tmp->cr_id = rtr->ci_id;
+			tmp->cr_msg = rtr->ci_msg;
+			dev->cd_npendrtr++;
+			wait = tmp;
+			break;
+		}
+	}
 
-  if (wait)
-    {
-      /* Send the remote transmission request */
+	if (wait)
+	{
+		/* Send the remote transmission request */
 
-      ret = dev_remoterequest(dev, wait->cr_id);
-      if (ret >= 0)
-        {
-          /* Then wait for the response */
+		ret = dev_remoterequest(dev, wait->cr_id);
+		if (ret >= 0)
+				{
+			/* Then wait for the response */
 
-          ret = can_takesem(&wait->cr_sem);
-        }
-    }
+			ret = can_takesem(&wait->cr_sem);
+		}
+	}
 
-  leave_critical_section(flags);
-  return ret;
+	leave_critical_section(flags);
+	return ret;
 }
 
 /****************************************************************************
@@ -1013,37 +1013,37 @@ static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
 
 static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode     *inode = filep->f_inode;
-  FAR struct can_dev_s *dev   = inode->i_private;
-  int                   ret   = OK;
+	FAR struct inode *inode = filep->f_inode;
+	FAR struct can_dev_s *dev = inode->i_private;
+	int ret = OK;
 
-  caninfo("cmd: %d arg: %ld\n", cmd, arg);
+	caninfo ("cmd: %d arg: %ld\n", cmd, arg);
 
-  /* Handle built-in ioctl commands */
+	/* Handle built-in ioctl commands */
 
-  switch (cmd)
-    {
-      /* CANIOC_RTR: Send the remote transmission request and wait for the
-       * response.  Argument is a reference to struct canioc_rtr_s
-       * (casting to uintptr_t first eliminates complaints on some
-       * architectures where the sizeof long is different from the size of
-       * a pointer).
-       */
+	switch (cmd)
+	{
+	/* CANIOC_RTR: Send the remote transmission request and wait for the
+	 * response.  Argument is a reference to struct canioc_rtr_s
+	 * (casting to uintptr_t first eliminates complaints on some
+	 * architectures where the sizeof long is different from the size of
+	 * a pointer).
+	 */
 
-      case CANIOC_RTR:
-        ret = can_rtrread(dev, (FAR struct canioc_rtr_s *)((uintptr_t)arg));
-        break;
+	case CANIOC_RTR:
+		ret = can_rtrread(dev, (FAR struct canioc_rtr_s *) ((uintptr_t) arg));
+		break;
 
-      /* Not a "built-in" ioctl command.. perhaps it is unique to this
-       * lower-half, device driver.
-       */
+		/* Not a "built-in" ioctl command.. perhaps it is unique to this
+		 * lower-half, device driver.
+		 */
 
-      default:
-        ret = dev_ioctl(dev, cmd, arg);
-        break;
-    }
+	default:
+		ret = dev_ioctl(dev, cmd, arg);
+		break;
+	}
 
-  return ret;
+	return ret;
 }
 
 /****************************************************************************
@@ -1224,45 +1224,45 @@ errout:
 
 int can_register(FAR const char *path, FAR struct can_dev_s *dev)
 {
-  int i;
+	int i;
 
-  /* Initialize the CAN device structure */
+	/* Initialize the CAN device structure */
 
-  dev->cd_ocount     = 0;
-  dev->cd_ntxwaiters = 0;
-  dev->cd_nrxwaiters = 0;
-  dev->cd_npendrtr   = 0;
+	dev->cd_ocount = 0;
+	dev->cd_ntxwaiters = 0;
+	dev->cd_nrxwaiters = 0;
+	dev->cd_npendrtr = 0;
 #ifdef CONFIG_CAN_ERRORS
   dev->cd_error      = 0;
 #endif
 
-  /* Initialize semaphores */
+	/* Initialize semaphores */
 
-  nxsem_init(&dev->cd_xmit.tx_sem, 0, 1);
-  nxsem_init(&dev->cd_closesem,    0, 1);
+	nxsem_init(&dev->cd_xmit.tx_sem, 0, 1);
+	nxsem_init(&dev->cd_closesem, 0, 1);
 #ifndef CONFIG_DISABLE_POLL
   nxsem_init(&dev->cd_pollsem,     0, 1);
 #endif
 
-  for (i = 0; i < CONFIG_CAN_NPENDINGRTR; i++)
-    {
-      /* Initialize wait semaphores.  These semaphores are used for signaling
-       * and should not have priority inheritance enabled.
-       */
+	for (i = 0; i < CONFIG_CAN_NPENDINGRTR; i++)
+			{
+		/* Initialize wait semaphores.  These semaphores are used for signaling
+		 * and should not have priority inheritance enabled.
+		 */
 
-      nxsem_init(&dev->cd_rtr[i].cr_sem, 0, 0);
-      nxsem_setprotocol(&dev->cd_rtr[i].cr_sem, SEM_PRIO_NONE);
-      dev->cd_rtr[i].cr_msg = NULL;
-    }
+		nxsem_init(&dev->cd_rtr[i].cr_sem, 0, 0);
+		nxsem_setprotocol(&dev->cd_rtr[i].cr_sem, SEM_PRIO_NONE);
+		dev->cd_rtr[i].cr_msg = NULL;
+	}
 
-  /* Initialize/reset the CAN hardware */
+	/* Initialize/reset the CAN hardware */
 
-  dev_reset(dev);
+	dev_reset(dev);
 
-  /* Register the CAN device */
+	/* Register the CAN device */
 
-  caninfo("Registering %s\n", path);
-  return register_driver(path, &g_canops, 0666, dev);
+	caninfo ("Registering %s\n", path);
+	return register_driver(path, &g_canops, 0666, dev);
 }
 
 /****************************************************************************
@@ -1285,124 +1285,124 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
  ****************************************************************************/
 
 int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
-                FAR uint8_t *data)
+		FAR uint8_t *data)
 {
-  FAR struct can_rxfifo_s *fifo;
-  FAR uint8_t             *dest;
-  FAR struct list_node    *node;
-  FAR struct list_node    *node;
-  int                      nexttail;
-  int                      errcode = -ENOMEM;
-  int                      i;
+	FAR struct can_rxfifo_s *fifo;
+	FAR uint8_t *dest;
+	FAR struct list_node *node;
+	FAR struct list_node *node;
+	int nexttail;
+	int errcode = -ENOMEM;
+	int i;
 
-  caninfo("ID: %d DLC: %d\n", hdr->ch_id, hdr->ch_dlc);
+	caninfo ("ID: %d DLC: %d\n", hdr->ch_id, hdr->ch_dlc);
 
-  /* Check if adding this new message would over-run the drivers ability to
-   * enqueue read data.
-   */
+	/* Check if adding this new message would over-run the drivers ability to
+	 * enqueue read data.
+	 */
 
-  /* First, check if this response matches any RTR response that we may be
-   * waiting for.
-   */
+	/* First, check if this response matches any RTR response that we may be
+	 * waiting for.
+	 */
 
-  if (dev->cd_npendrtr > 0)
-    {
-      /* There are pending RTR requests -- search the lists of requests
-       * and see any any matches this new message.
-       */
+	if (dev->cd_npendrtr > 0)
+			{
+		/* There are pending RTR requests -- search the lists of requests
+		 * and see any any matches this new message.
+		 */
 
-      for (i = 0; i < CONFIG_CAN_NPENDINGRTR; i++)
-        {
-          FAR struct can_rtrwait_s *rtr = &dev->cd_rtr[i];
-          FAR struct can_msg_s     *msg = rtr->cr_msg;
+		for (i = 0; i < CONFIG_CAN_NPENDINGRTR; i++)
+				{
+			FAR struct can_rtrwait_s *rtr = &dev->cd_rtr[i];
+			FAR struct can_msg_s *msg = rtr->cr_msg;
 
-          /* Check if the entry is valid and if the ID matches.  A valid
-           * entry has a non-NULL receiving address
-           */
+			/* Check if the entry is valid and if the ID matches.  A valid
+			 * entry has a non-NULL receiving address
+			 */
 
-          if (msg && hdr->ch_id == rtr->cr_id)
-            {
-              int nbytes;
+			if (msg && hdr->ch_id == rtr->cr_id)
+					{
+				int nbytes;
 
-              /* We have the response... copy the data to the user's buffer */
+				/* We have the response... copy the data to the user's buffer */
 
-              memcpy(&msg->cm_hdr, hdr, sizeof(struct can_hdr_s));
+				memcpy(&msg->cm_hdr, hdr, sizeof(struct can_hdr_s));
 
-              nbytes = can_dlc2bytes(hdr->ch_dlc);
-              for (i = 0, dest = msg->cm_data; i < nbytes; i++)
-                {
-                  *dest++ = *data++;
-                }
+				nbytes = can_dlc2bytes(hdr->ch_dlc);
+				for (i = 0, dest = msg->cm_data; i < nbytes; i++)
+						{
+					*dest++ = *data++;
+				}
 
-              /* Mark the entry unused */
+				/* Mark the entry unused */
 
-              rtr->cr_msg = NULL;
-              dev->cd_npendrtr--;
+				rtr->cr_msg = NULL;
+				dev->cd_npendrtr--;
 
-              /* And restart the waiting thread */
+				/* And restart the waiting thread */
 
-              can_givesem(&rtr->cr_sem);
-            }
-        }
-    }
+				can_givesem(&rtr->cr_sem);
+			}
+		}
+	}
 
-  list_for_every_safe(&dev->cd_readers, node, tmp)
-    {
-      FAR struct can_reader_s *reader = (FAR struct can_reader_s *)node;
-      fifo = &reader->fifo;
+	list_for_every_safe(&dev->cd_readers, node, tmp)
+	{
+		FAR struct can_reader_s *reader = (FAR struct can_reader_s *) node;
+		fifo = &reader->fifo;
 
-      nexttail = fifo->rx_tail + 1;
-      if (nexttail >= CONFIG_CAN_FIFOSIZE)
-        {
-          nexttail = 0;
-        }
+		nexttail = fifo->rx_tail + 1;
+		if (nexttail >= CONFIG_CAN_FIFOSIZE)
+		{
+			nexttail = 0;
+		}
 
-      /* Refuse the new data if the FIFO is full */
+		/* Refuse the new data if the FIFO is full */
 
-      if (nexttail != fifo->rx_head)
-        {
-          int nbytes;
-          int sval;
+		if (nexttail != fifo->rx_head)
+				{
+			int nbytes;
+			int sval;
 
-          /* Add the new, decoded CAN message at the tail of the FIFO.
-           *
-           * REVISIT:  In the CAN FD format, the coding of the DLC differs
-           * from the standard CAN format. The DLC codes 0 to 8 have the
-           * same coding as in standard CAN, the codes 9 to 15, which in
-           * standard CAN all code a data field of 8 bytes, are encoded:
-           *
-           *   9->12, 10->16, 11->20, 12->24, 13->32, 14->48, 15->64
-           */
+			/* Add the new, decoded CAN message at the tail of the FIFO.
+			 *
+			 * REVISIT:  In the CAN FD format, the coding of the DLC differs
+			 * from the standard CAN format. The DLC codes 0 to 8 have the
+			 * same coding as in standard CAN, the codes 9 to 15, which in
+			 * standard CAN all code a data field of 8 bytes, are encoded:
+			 *
+			 *   9->12, 10->16, 11->20, 12->24, 13->32, 14->48, 15->64
+			 */
 
-          memcpy(&fifo->rx_buffer[fifo->rx_tail].cm_hdr, hdr,
-                 sizeof(struct can_hdr_s));
+			memcpy(&fifo->rx_buffer[fifo->rx_tail].cm_hdr, hdr,
+					sizeof(struct can_hdr_s));
 
-          nbytes = can_dlc2bytes(hdr->ch_dlc);
-          memcpy(fifo->rx_buffer[fifo->rx_tail].cm_data, data, nbytes);
+			nbytes = can_dlc2bytes(hdr->ch_dlc);
+			memcpy(fifo->rx_buffer[fifo->rx_tail].cm_data, data, nbytes);
 
-          /* Increment the tail of the circular buffer */
+			/* Increment the tail of the circular buffer */
 
-          fifo->rx_tail = nexttail;
+			fifo->rx_tail = nexttail;
 
-          /* The increment the counting semaphore. The maximum value should be
-           * CONFIG_CAN_FIFOSIZE -- one possible count for each allocated
-           * message buffer.
-           */
+			/* The increment the counting semaphore. The maximum value should be
+			 * CONFIG_CAN_FIFOSIZE -- one possible count for each allocated
+			 * message buffer.
+			 */
 
-          sval = 0;
-          if (nxsem_getvalue(&fifo->rx_sem, &sval) <= 0)
-            {
-              can_givesem(&fifo->rx_sem);
-            }
+			sval = 0;
+			if (nxsem_getvalue(&fifo->rx_sem, &sval) <= 0)
+					{
+				can_givesem(&fifo->rx_sem);
+			}
 
-          errcode = OK;
+			errcode = OK;
 
-          /* Notify all poll/select waiters that they can read from the
-           * cd_recv buffer
-           */
+			/* Notify all poll/select waiters that they can read from the
+			 * cd_recv buffer
+			 */
 
-          can_pollnotify(dev, POLLIN);
-        }
+			can_pollnotify(dev, POLLIN);
+		}
 #ifdef CONFIG_CAN_ERRORS
       else
         {
@@ -1411,9 +1411,9 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
           dev->cd_error |= CAN_ERROR5_RXOVERFLOW;
         }
 #endif
-    }
+	}
 
-  return errcode;
+	return errcode;
 }
 
 /****************************************************************************
@@ -1490,55 +1490,55 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
 int can_txdone(FAR struct can_dev_s *dev)
 {
-  int ret = -ENOENT;
+	int ret = -ENOENT;
 
-  caninfo("xmit head: %d queue: %d tail: %d\n",
-          dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail);
+	caninfo ("xmit head: %d queue: %d tail: %d\n",
+			dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail);
 
-  /* Verify that the xmit FIFO is not empty */
+	/* Verify that the xmit FIFO is not empty */
 
-  if (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
-    {
-      /* The tx_queue index is incremented each time can_xmit() queues
-       * the transmission.  When can_txdone() is called, the tx_queue
-       * index should always have been advanced beyond the current tx_head
-       * index.
-       */
+	if (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
+			{
+		/* The tx_queue index is incremented each time can_xmit() queues
+		 * the transmission.  When can_txdone() is called, the tx_queue
+		 * index should always have been advanced beyond the current tx_head
+		 * index.
+		 */
 
-      DEBUGASSERT(dev->cd_xmit.tx_head != dev->cd_xmit.tx_queue);
+		DEBUGASSERT(dev->cd_xmit.tx_head != dev->cd_xmit.tx_queue);
 
-      /* Remove the message at the head of the xmit FIFO */
+		/* Remove the message at the head of the xmit FIFO */
 
-      if (++dev->cd_xmit.tx_head >= CONFIG_CAN_FIFOSIZE)
-        {
-          dev->cd_xmit.tx_head = 0;
-        }
+		if (++dev->cd_xmit.tx_head >= CONFIG_CAN_FIFOSIZE)
+		{
+			dev->cd_xmit.tx_head = 0;
+		}
 
-      /* Send the next message in the FIFO */
+		/* Send the next message in the FIFO */
 
-      (void)can_xmit(dev);
+		(void) can_xmit(dev);
 
-      /* Are there any threads waiting for space in the TX FIFO? */
+		/* Are there any threads waiting for space in the TX FIFO? */
 
-      if (dev->cd_ntxwaiters > 0)
-        {
-          /* Yes.. Inform them that new xmit space is available */
+		if (dev->cd_ntxwaiters > 0)
+				{
+			/* Yes.. Inform them that new xmit space is available */
 
-          ret = can_givesem(&dev->cd_xmit.tx_sem);
-        }
-      else
-        {
-          ret = OK;
-        }
-    }
+			ret = can_givesem(&dev->cd_xmit.tx_sem);
+		}
+		else
+		{
+			ret = OK;
+		}
+	}
 
-  /* Notify all poll/select waiters that they can write to the cd_xmit
-   * buffer
-   */
+	/* Notify all poll/select waiters that they can write to the cd_xmit
+	 * buffer
+	 */
 
-  can_pollnotify(dev, POLLOUT);
+	can_pollnotify(dev, POLLOUT);
 
-  return ret;
+	return ret;
 }
 
 /****************************************************************************
