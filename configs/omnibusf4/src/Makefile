@@ -67,6 +67,12 @@ endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += stm32_reset.c
+endif
+ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
+CSRCS += stm32_ioctl.c
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)

@@ -49,6 +49,7 @@
 
 #include <nuttx/semaphore.h>
 #include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxcursor.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -130,7 +131,7 @@ enum nxmsg_e
   NX_CLIMSG_NEWPOSITION,      /* New window size/position */
   NX_CLIMSG_MOUSEIN,          /* New mouse positional data available for window */
   NX_CLIMSG_KBDIN,            /* New keypad input available for window */
-  NX_CLIMSG_BLOCKED,          /* The window is blocked */
+  NX_CLIMSG_EVENT,            /* Server->client event */
 
   /* Client-to-Server Messages **********************************************/
 
@@ -139,6 +140,10 @@ enum nxmsg_e
   NX_SVRMSG_OPENWINDOW,       /* Create a new window */
   NX_SVRMSG_CLOSEWINDOW,      /* Close an existing window */
   NX_SVRMSG_BLOCKED,          /* The window is blocked */
+  NX_SVRMSG_SYNCH,            /* Window syncrhonization request */
+  NX_SVRMSG_CURSOR_ENABLE,    /* Enable/disablel cursor presentation */
+  NX_SVRMSG_CURSOR_IMAGE,     /* Set cursor image */
+  NX_SVRMSG_CURSOR_SETPOS,    /* Set cursor position */
   NX_SVRMSG_REQUESTBKGD,      /* Open the background window */
   NX_SVRMSG_RELEASEBKGD,      /* Release the background window */
   NX_SVRMSG_SETPOSITION,      /* Window position has changed */
@@ -146,6 +151,7 @@ enum nxmsg_e
   NX_SVRMSG_GETPOSITION,      /* Get the current window position and size */
   NX_SVRMSG_RAISE,            /* Move the window to the top */
   NX_SVRMSG_LOWER,            /* Move the window to the bottom */
+  NX_SVRMSG_MODAL,            /* Select/de-slect window modal state */
   NX_SVRMSG_SETPIXEL,         /* Set a single pixel in the window with a color */
   NX_SVRMSG_FILL,             /* Fill a rectangle in the window with a color */
   NX_SVRMSG_GETRECTANGLE,     /* Get a rectangular region in the window */
@@ -229,15 +235,14 @@ struct nxclimsg_kbdin_s
 };
 #endif
 
-/* This message confirms that that all queued window messages have been
- * flushed and that the all further window messages are blocked.
- */
+/* This message provides server event notifications to the client. */
 
-struct nxclimsg_blocked_s
+struct nxclimsg_event_s
 {
   uint32_t msgid;                /* NX_CLIMSG_BLOCKED */
   FAR struct nxbe_window_s *wnd; /* The window that is blocked */
   FAR void *arg;                 /* User argument */
+  enum nx_event_e event;         /* Server event */
 };
 
 /* Client-to-Server Message Structures **************************************/
@@ -281,6 +286,46 @@ struct nxsvrmsg_blocked_s
   FAR struct nxbe_window_s *wnd; /* The window that is blocked */
   FAR void *arg;                 /* User argument */
 };
+
+/* Synchronization request.  This is essentially an 'echo':  The NX server
+ * will receive the synchronization request and simply respond with a
+ * synchronized event.
+ */
+
+struct nxsvrmsg_synch_s
+{
+  uint32_t msgid;                /* NX_SVRMSG_SYNCH */
+  FAR struct nxbe_window_s *wnd; /* The window that requires synch'ing */
+  FAR void *arg;                 /* User argument */
+};
+
+#if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
+/* Enable/disable cursor */
+
+struct nxsvrmsg_curenable_s
+{
+  uint32_t msgid;                /* NX_SVRMSG_CURSOR_ENABLE */
+  bool enable;                   /* True: show the cursor, false: hide the cursor */
+};
+
+#if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
+/* Set cursor image. */
+
+struct nxsvrmsg_curimage_s
+{
+  uint32_t msgid;                    /* NX_SVRMSG_CURSOR_IMAGE */
+  FAR struct nx_cursorimage_s image  /* Describes the cursor image */
+};
+#endif
+
+/* Set cursor position. */
+
+struct nxsvrmsg_curpos_s
+{
+  uint32_t msgid;                  /* NX_SVRMSG_CURSOR_SETPOS */
+  FAR struct nxgl_point_s pos;     /* The new cursor position */
+};
+#endif
 
 /* This message requests the server to create a new window */
 
@@ -338,7 +383,18 @@ struct nxsvrmsg_raise_s
 struct nxsvrmsg_lower_s
 {
   uint32_t msgid;                  /* NX_SVRMSG_LOWER */
-  FAR struct nxbe_window_s *wnd;   /* The window to be lowered  */
+  FAR struct nxbe_window_s *wnd;   /* The window to be lowered */
+};
+
+/* This message either (1) raises a window to the top of the display and
+ * selects the modal state, or (2) de-selects the modal state.
+ */
+
+struct nxsvrmsg_modal_s
+{
+  uint32_t msgid;                  /* NX_SVRMSG_MODAL */
+  FAR struct nxbe_window_s *wnd;   /* The window to be modified */
+  bool modal;                      /* True: enter modal state; False: leave modal state */
 };
 
 /* Set a single pixel in the window with a color */

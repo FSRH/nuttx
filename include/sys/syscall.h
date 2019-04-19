@@ -350,12 +350,19 @@
 #define SYS_fstatfs                    (__SYS_filedesc + 14)
 #define SYS_telldir                    (__SYS_filedesc + 15)
 
-#if defined(CONFIG_PSEUDOFS_SOFTLINKS)
-#  define SYS_link                     (__SYS_filedesc + 16)
-#  define SYS_readlink                 (__SYS_filedesc + 17)
-#  define __SYS_pipes                  (__SYS_filedesc + 18)
+#ifdef CONFIG_FS_RAMMAP
+#  define SYS_munmap                   (__SYS_filedesc + 16)
+#  define __SYS_link                   (__SYS_filedesc + 17)
 #else
-#  define __SYS_pipes                  (__SYS_filedesc + 16)
+#  define __SYS_link                   (__SYS_filedesc + 16)
+#endif
+
+#if defined(CONFIG_PSEUDOFS_SOFTLINKS)
+#  define SYS_link                     (__SYS_link + 0)
+#  define SYS_readlink                 (__SYS_link + 1)
+#  define __SYS_pipes                  (__SYS_link + 2)
+#else
+#  define __SYS_pipes                  __SYS_link
 #endif
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
@@ -425,22 +432,24 @@
 #  define SYS_pthread_create           (__SYS_pthread + 4)
 #  define SYS_pthread_detach           (__SYS_pthread + 5)
 #  define SYS_pthread_exit             (__SYS_pthread + 6)
-#  define SYS_pthread_getschedparam    (__SYS_pthread + 7)
-#  define SYS_pthread_getspecific      (__SYS_pthread + 8)
-#  define SYS_pthread_join             (__SYS_pthread + 9)
-#  define SYS_pthread_key_create       (__SYS_pthread + 10)
-#  define SYS_pthread_key_delete       (__SYS_pthread + 11)
-#  define SYS_pthread_mutex_destroy    (__SYS_pthread + 12)
-#  define SYS_pthread_mutex_init       (__SYS_pthread + 13)
-#  define SYS_pthread_mutex_timedlock  (__SYS_pthread + 14)
-#  define SYS_pthread_mutex_trylock    (__SYS_pthread + 15)
-#  define SYS_pthread_mutex_unlock     (__SYS_pthread + 16)
+#  define SYS_pthread_get_stackaddr_np (__SYS_pthread + 7)
+#  define SYS_pthread_get_stacksize_np (__SYS_pthread + 8)
+#  define SYS_pthread_getschedparam    (__SYS_pthread + 9)
+#  define SYS_pthread_getspecific      (__SYS_pthread + 10)
+#  define SYS_pthread_join             (__SYS_pthread + 11)
+#  define SYS_pthread_key_create       (__SYS_pthread + 12)
+#  define SYS_pthread_key_delete       (__SYS_pthread + 13)
+#  define SYS_pthread_mutex_destroy    (__SYS_pthread + 14)
+#  define SYS_pthread_mutex_init       (__SYS_pthread + 15)
+#  define SYS_pthread_mutex_timedlock  (__SYS_pthread + 16)
+#  define SYS_pthread_mutex_trylock    (__SYS_pthread + 17)
+#  define SYS_pthread_mutex_unlock     (__SYS_pthread + 18)
 
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-#  define SYS_pthread_mutex_consistent (__SYS_pthread + 17)
-#  define __SYS_pthread_setschedparam  (__SYS_pthread + 18)
+#  define SYS_pthread_mutex_consistent (__SYS_pthread + 19)
+#  define __SYS_pthread_setschedparam  (__SYS_pthread + 20)
 #else
-#  define __SYS_pthread_setschedparam  (__SYS_pthread + 17)
+#  define __SYS_pthread_setschedparam  (__SYS_pthread + 19)
 #endif
 
 #  define SYS_pthread_setschedparam    (__SYS_pthread_setschedparam + 0)
