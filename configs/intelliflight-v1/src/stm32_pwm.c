@@ -60,7 +60,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define HAVE_PWM 10
+#define HAVE_PWM 1
 #ifndef CONFIG_PWM
 #  undef HAVE_PWM
 #endif
@@ -80,160 +80,72 @@
 int stm32_pwm_setup(void)
 {
 #ifdef HAVE_PWM
-  static bool initialized = false;
-  struct pwm_lowerhalf_s *pwm;
-  int ret;
+	static bool initialized = false;
+	struct pwm_lowerhalf_s *pwm;
+	int ret;
 
-  /* Have we already initialized? */
+	/* Have we already initialized? */
 
-  if (!initialized)
-    {
-      /* Call stm32_pwminitialize() to get an instance of the PWM interface */
+	if (!initialized)
+	{
+		/* Call stm32_pwminitialize() to get an instance of the PWM interface */
 
 #if defined(CONFIG_STM32F7_TIM1_PWM)
-#if defined(CONFIG_STM32F7_TIM1_CH1OUT)
 		pwm = stm32_pwminitialize(1);
 		if (!pwm)
 		{
-			aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
-			return -ENODEV;
-		}
-
-		ret = pwm_register(DEV_PWM3, pwm);
-		if (ret < 0)
-		{
-			aerr("ERROR: pwm_register failed: %d\n", ret);
-			return ret;
-		}
-#endif
-
-#if defined(CONFIG_STM32F7_TIM1_CH2OUT)
-		pwm = stm32_pwminitialize(1);
-		if (!pwm)
-		{
-			aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
-			return -ENODEV;
-		}
-
-		ret = pwm_register(DEV_PWM4, pwm);
-		if (ret < 0) {
-			aerr("ERROR: pwm_register failed: %d\n", ret);
-			return ret;
-		}
-#endif
-#if defined(CONFIG_STM32F7_TIM1_CH3OUT)
-		pwm = stm32_pwminitialize(1);
-		if (!pwm) {
-			aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
-			return -ENODEV;
-		}
-
-		ret = pwm_register(DEV_PWM5, pwm);
-		if (ret < 0) {
-			aerr("ERROR: pwm_register failed: %d\n", ret);
-			return ret;
-		}
-#endif
-#if defined(CONFIG_STM32F7_TIM1_CH4OUT)
-		pwm = stm32_pwminitialize(1);
-		if (!pwm) {
-			aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
-			return -ENODEV;
-		}
-
-		ret = pwm_register(DEV_PWMLED0, pwm);
-		if (ret < 0) {
-			aerr("ERROR: pwm_register failed: %d\n", ret);
-			return ret;
-		}
-#endif
-#endif
-
-#if defined(CONFIG_STM32F7_TIM2_PWM)
-#if defined(CONFIG_STM32F7_TIM2_CH3OUT)
-		pwm = stm32_pwminitialize(2);
-		if (!pwm) {
-			aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
-			return -ENODEV;
-		}
-
-		ret = pwm_register(DEV_PWM6, pwm);
-		if (ret < 0) {
-			aerr("ERROR: pwm_register failed: %d\n", ret);
-			return ret;
-		}
-#endif
-#if defined(CONFIG_STM32F7_TIM2_CH4OUT)
-		pwm = stm32_pwminitialize(2);
-		if (!pwm) {
-			aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
-			return -ENODEV;
-		}
-
-		ret = pwm_register(DEV_PWM7, pwm);
-		if (ret < 0) {
-			aerr("ERROR: pwm_register failed: %d\n", ret);
-			return ret;
-		}
-#endif
-#endif
-
-#if defined(CONFIG_STM32F7_TIM3_PWM)
-#if defined(CONFIG_STM32F7_TIM3_CH3OUT)
-		pwm = stm32_pwminitialize(3);
-		if (!pwm) {
-			aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
+			aerr ("ERROR: Failed to get the STM32F7 PWM lower half\n");
 			return -ENODEV;
 		}
 
 		ret = pwm_register(DEV_PWM1, pwm);
-		if (ret < 0) {
-			aerr("ERROR: pwm_register failed: %d\n", ret);
+		if (ret < 0)
+				{
+			aerr ("ERROR: pwm_register failed: %d\n", ret);
 			return ret;
 		}
 #endif
-#if defined(CONFIG_STM32F7_TIM3_CH4OUT)
-		pwm = stm32_pwminitialize(3);
+
+#if defined(CONFIG_STM32F7_TIM2_PWM)
+		pwm = stm32_pwminitialize(2);
 		if (!pwm) {
-			aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
+			aerr ("ERROR: Failed to get the STM32F7 PWM lower half\n");
 			return -ENODEV;
 		}
 
 		ret = pwm_register(DEV_PWM2, pwm);
 		if (ret < 0) {
-			aerr("ERROR: pwm_register failed: %d\n", ret);
+			aerr ("ERROR: pwm_register failed: %d\n", ret);
 			return ret;
 		}
 #endif
+
+#if defined(CONFIG_STM32F7_TIM3_PWM)
+		pwm = stm32_pwminitialize(3);
+		if (!pwm) {
+			aerr ("ERROR: Failed to get the STM32F7 PWM lower half\n");
+			return -ENODEV;
+		}
+
+		ret = pwm_register(DEV_PWM3, pwm);
+		if (ret < 0) {
+			aerr ("ERROR: pwm_register failed: %d\n", ret);
+			return ret;
+		}
 #endif
 
 #if defined(CONFIG_STM32F7_TIM4_PWM)
-#if defined(CONFIG_STM32F7_TIM4_CH3OUT)
 		pwm = stm32_pwminitialize(4);
 		if (!pwm) {
-			aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
+			aerr ("ERROR: Failed to get the STM32F7 PWM lower half\n");
 			return -ENODEV;
 		}
 
-		ret = pwm_register(DEV_PWM8, pwm);
+		ret = pwm_register(DEV_PWM4, pwm);
 		if (ret < 0) {
-			aerr("ERROR: pwm_register failed: %d\n", ret);
+			aerr ("ERROR: pwm_register failed: %d\n", ret);
 			return ret;
 		}
-#endif
-#if defined(CONFIG_STM32F7_TIM4_CH4OUT)
-		pwm = stm32_pwminitialize(4);
-		if (!pwm) {
-			aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
-			return -ENODEV;
-		}
-
-		ret = pwm_register(DEV_PWM9, pwm);
-		if (ret < 0) {
-			aerr("ERROR: pwm_register failed: %d\n", ret);
-			return ret;
-		}
-#endif
 #endif
 
 		/* Now we are initialized */
