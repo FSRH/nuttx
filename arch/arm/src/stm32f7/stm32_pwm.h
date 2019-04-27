@@ -130,7 +130,7 @@
 #include <arch/board/board.h>
 #include "chip/stm32_tim.h"
 
-#ifdef CONFIG_STM32F7_PWM_MULTICHAN
+#ifdef CONFIG_PWM_MULTICHAN
 
 #ifdef CONFIG_STM32F7_TIM1_CHANNEL1
 #  ifdef CONFIG_STM32F7_TIM1_CH1OUT
