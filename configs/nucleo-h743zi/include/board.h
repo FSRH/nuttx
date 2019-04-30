@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/nucleo-h743zi/include/board.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Simon Laube <simon@leitwert.ch>
  *            Mateusz Szafoni <raiden00@railab.me>
@@ -250,6 +250,25 @@
 
 #define BOARD_FLASH_WAITSTATES 4
 
+/* SDMMC definitions ****************************************************************/
+
+/* Init 400kHz, PLL1Q/(2*250) */
+
+#define STM32_SDMMC_INIT_CLKDIV     (250 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+
+/* Just set these to 25 MHz for now, PLL1Q/(2*4), for default speed 12.5MB/s */
+
+#define STM32_SDMMC_MMCXFR_CLKDIV   (4 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#define STM32_SDMMC_SDXFR_CLKDIV    (4 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+
+#define STM32_SDMMC_CLKCR_EDGE      STM32_SDMMC_CLKCR_NEGEDGE
+
+/* Ethernet definitions ****************************************************************/
+
+#define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2    /* PG13 */
+#define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_1    /* PB 13 */
+#define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
+
 /* LED definitions ******************************************************************/
 /* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a Blue
  * LED and LD3 a Red LED, that can be controlled by software. The following
@@ -321,10 +340,16 @@
 #define GPIO_USART6_RX     GPIO_USART6_RX_2  /* PG9 */
 #define GPIO_USART6_TX     GPIO_USART6_TX_2  /* PG14 */
 
-/* I2C1 Use Nucleo I2C pins */
+/* I2C1 Use Nucleo I2C1 pins */
 
-#define GPIO_I2C1_SCL GPIO_I2C1_SCL_2 /* PB8 */
-#define GPIO_I2C1_SDA GPIO_I2C1_SDA_2 /* PB9 */
+#define GPIO_I2C1_SCL GPIO_I2C1_SCL_2 /* PB8 - D15 */
+#define GPIO_I2C1_SDA GPIO_I2C1_SDA_2 /* PB9 - D14 */
+
+/* I2C2 Use Nucleo I2C2 pins */
+
+#define GPIO_I2C2_SCL  GPIO_I2C2_SCL_2  /* PF1 - D69 */
+#define GPIO_I2C2_SDA  GPIO_I2C2_SDA_2  /* PF0 - D68 */
+#define GPIO_I2C2_SMBA GPIO_I2C2_SMBA_2 /* PF2 - D70 */
 
 /* SPI3 */
 

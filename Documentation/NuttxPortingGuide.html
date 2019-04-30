@@ -2176,10 +2176,6 @@ The specific environmental definitions are unique for each board but should incl
     handler now.
   </li>
 </ol>
-<p>
-  This API is <i>NOT</i> required if <code>CONFIG_DISABLE_SIGNALS</code>
-  is defined.
-</p>
 
 <h3><a name="upallocateheap">4.2.15 <code>up_allocate_heap()</code></a></h3>
 <p><b>Function Prototype</b>: <code>void up_allocate_heap(FAR void **heap_start, size_t *heap_size);</code></p>
@@ -6470,7 +6466,7 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
 <ul><pre>
 #include &lt;syslog.h&gt;
 int syslog(int priority, FAR const IPTR char *format, ...);
-int vsyslog(int priority, FAR const IPTR char *src, va_list ap);
+void vsyslog(int priority, FAR const IPTR char *src, va_list ap);
 </pre></ul>
 <p><b>Description:</b>
   <code>syslog()</code> generates a log message. The priority argument is formed by  ORing the facility and the level values (see <code>include/syslog.h</code>). The remaining arguments are a format, as in <code>printf()</code> and any arguments to the format.
