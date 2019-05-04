@@ -1,9 +1,9 @@
 /************************************************************************************
  * configs/nucleo-144/src/stm32_pwm.c
  *
- *   Copyright (C) 2019 Florian Hölzlwimmer. All rights reserved.
- *   Author: Florian Hölzlwimmer
- *   Author: Stephan Rappensperger
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Philippe Coval <p.coval@samsung.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,18 +42,15 @@
 
 #include <errno.h>
 #include <debug.h>
-
 #include <sys/types.h>
 
 #include <nuttx/board.h>
 #include <nuttx/drivers/pwm.h>
-
 #include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
 #include "stm32_pwm.h"
-
 #include "intelliflight-v1.h"
 
 /************************************************************************************
@@ -80,80 +77,86 @@
 int stm32_pwm_setup(void)
 {
 #ifdef HAVE_PWM
-	static bool initialized = false;
-	struct pwm_lowerhalf_s *pwm;
-	int ret;
+  static bool initialized = false;
+  struct pwm_lowerhalf_s *pwm;
+  int ret;
 
-	/* Have we already initialized? */
+  /* Have we already initialized? */
 
-	if (!initialized)
-	{
-		/* Call stm32_pwminitialize() to get an instance of the PWM interface */
+  if (!initialized)
+    {
+      /* Call stm32_pwminitialize() to get an instance of the PWM interface */
 
 #if defined(CONFIG_STM32F7_TIM1_PWM)
-		pwm = stm32_pwminitialize(1);
-		if (!pwm)
-		{
-			aerr ("ERROR: Failed to get the STM32F7 PWM lower half\n");
-			return -ENODEV;
-		}
+      pwm = stm32_pwminitialize(1);
+      if (!pwm)
+        {
+          aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
+          return -ENODEV;
+        }
 
-		ret = pwm_register(DEV_PWM1, pwm);
-		if (ret < 0)
-				{
-			aerr ("ERROR: pwm_register failed: %d\n", ret);
-			return ret;
-		}
+      ret = pwm_register("/dev/pwm0", pwm);
+      if (ret < 0)
+        {
+          aerr("ERROR: pwm_register failed: %d\n", ret);
+          return ret;
+        }
 #endif
 
 #if defined(CONFIG_STM32F7_TIM2_PWM)
-		pwm = stm32_pwminitialize(2);
-		if (!pwm) {
-			aerr ("ERROR: Failed to get the STM32F7 PWM lower half\n");
-			return -ENODEV;
-		}
+      pwm = stm32_pwminitialize(2);
+      if (!pwm)
+        {
+          aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
+          return -ENODEV;
+        }
 
-		ret = pwm_register(DEV_PWM2, pwm);
-		if (ret < 0) {
-			aerr ("ERROR: pwm_register failed: %d\n", ret);
-			return ret;
-		}
+      ret = pwm_register("/dev/pwm1", pwm);
+      if (ret < 0)
+        {
+          aerr("ERROR: pwm_register failed: %d\n", ret);
+          return ret;
+        }
 #endif
 
 #if defined(CONFIG_STM32F7_TIM3_PWM)
-		pwm = stm32_pwminitialize(3);
-		if (!pwm) {
-			aerr ("ERROR: Failed to get the STM32F7 PWM lower half\n");
-			return -ENODEV;
-		}
+      pwm = stm32_pwminitialize(3);
+      if (!pwm)
+        {
+          aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
+          return -ENODEV;
+        }
 
-		ret = pwm_register(DEV_PWM3, pwm);
-		if (ret < 0) {
-			aerr ("ERROR: pwm_register failed: %d\n", ret);
-			return ret;
-		}
+      ret = pwm_register("/dev/pwm2", pwm);
+      if (ret < 0)
+        {
+          aerr("ERROR: pwm_register failed: %d\n", ret);
+          return ret;
+        }
 #endif
 
 #if defined(CONFIG_STM32F7_TIM4_PWM)
-		pwm = stm32_pwminitialize(4);
-		if (!pwm) {
-			aerr ("ERROR: Failed to get the STM32F7 PWM lower half\n");
-			return -ENODEV;
-		}
+      pwm = stm32_pwminitialize(4);
+      if (!pwm)
+        {
+          aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
+          return -ENODEV;
+        }
 
-		ret = pwm_register(DEV_PWM4, pwm);
-		if (ret < 0) {
-			aerr ("ERROR: pwm_register failed: %d\n", ret);
-			return ret;
-		}
+      ret = pwm_register("/dev/pwm3", pwm);
+      if (ret < 0)
+        {
+          aerr("ERROR: pwm_register failed: %d\n", ret);
+          return ret;
+        }
 #endif
+      /* Now we are initialized */
 
-		/* Now we are initialized */
+      initialized = true;
+    }
 
-		initialized = true;
-	}
-
-	return OK;
+  return OK;
+#else
+  return -ENODEV;
+#endif
 }
-
-#endif /* CONFIG_PWM */

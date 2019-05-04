@@ -38,10 +38,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
-#include "stm32_ccm.h"
+#include <sys/types.h>
+#include <sys/mount.h>
+#include <debug.h>
+#include <syslog.h>
+
 #include "intelliflight-v1.h"
+#include <nuttx/leds/userled.h>
 
 /****************************************************************************
  * Public Functions
@@ -74,25 +78,85 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+	int ret;
+
 #ifdef CONFIG_FS_PROCFS
-  int ret;
-
-#ifdef CONFIG_STM32_CCM_PROCFS
-  /* Register the CCM procfs entry.  This must be done before the procfs is
-   * mounted.
-   */
-
-  (void) ccm_procfs_register();
-#endif
-
   /* Mount the procfs file system */
 
-  ret = mount(NULL, SAMV71_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0){
-      SYSLOG("ERROR: Failed to mount procfs at %s: %d\n",
-             SAMV71_PROCFS_MOUNTPOINT, ret);
-  }
+  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
+             STM32_PROCFS_MOUNTPOINT, ret);
+    }
 #endif
 
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize(LED_DRIVER_PATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_STM32F7_BBSRAM
+  /* Initialize battery-backed RAM */
+
+  (void)stm32_bbsram_int();
+#endif
+
+#if defined(CONFIG_FAT_DMAMEMORY)
+  if (stm32_dma_alloc_init() < 0)
+    {
+      syslog(LOG_ERR, "DMA alloc FAILED");
+    }
+#endif
+
+#if defined(CONFIG_NUCLEO_SPI_TEST)
+  /* Create SPI interfaces */
+
+  ret = stm32_spidev_bus_test();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI interfaces: %d\n", ret);
+      return ret;
+    }
+#endif
+
+//#if defined(CONFIG_MMCSD)
+//	/* Configure SDIO */
+//	/* Initialize the SDIO block driver */
+//
+//	ret = stm32_sdio_initialize();
+//	if (ret != OK)
+//	{
+//		ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+//		return ret;
+//	}
+//#endif
+
+#if defined(CONFIG_PWM)
+	/* Initialize PWM and register the PWM device */
+
+	ret = stm32_pwm_setup();
+	if (ret < 0) {
+		syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+	}
+#endif
+
+	UNUSED(ret);
 	return OK;
 }
+
