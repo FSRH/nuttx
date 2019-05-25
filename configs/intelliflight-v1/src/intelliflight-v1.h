@@ -51,29 +51,29 @@
 
 /* Assume that we have everything */
 
-#define HAVE_USBDEV     1
-#define HAVE_USBHOST    1
-#define HAVE_USBMONITOR 1
-#define HAVE_SDIO       1
-#define HAVE_CS43L22    1
-#define HAVE_RTC_DRIVER 1
-#define HAVE_NETMONITOR 1
-#define HAVE_HCIUART    1
+//#define HAVE_USBDEV     1
+//#define HAVE_USBHOST    1
+//#define HAVE_USBMONITOR 1
+//#define HAVE_SDIO       1
+//#define HAVE_CS43L22    1
+//#define HAVE_RTC_DRIVER 1
+//#define HAVE_NETMONITOR 1
+//#define HAVE_HCIUART    1
 
 /* Can't support USB host or device features if USB OTG FS is not enabled */
 
-#ifndef CONFIG_STM32_OTGFS
-#  undef HAVE_USBDEV
-#  undef HAVE_USBHOST
-#  undef HAVE_USBMONITOR
-#endif
+//#ifndef CONFIG_STM32_OTGFS
+//#  undef HAVE_USBDEV
+//#  undef HAVE_USBHOST
+//#  undef HAVE_USBMONITOR
+//#endif
 
 /* Can't support USB device monitor if USB device is not enabled */
 
-#ifndef CONFIG_USBDEV
-#  undef HAVE_USBDEV
-#  undef HAVE_USBMONITOR
-#endif
+//#ifndef CONFIG_USBDEV
+//#  undef HAVE_USBDEV
+//#  undef HAVE_USBMONITOR
+//#endif
 
 /* Can't support USB host is USB host is not enabled */
 
@@ -113,39 +113,16 @@
 /* ItelliFlight v1 GPIOs ***********************************************************************/
 /* This board has one user-controllable GPIO pin: PB2
  */
-//
-//#define BOARD_NGPIOIN     0 /* Amount of GPIO Input pins */
-//#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
-//#define BOARD_NGPIOINT    0 /* Amount of GPIO Input w/ Interruption pins */
-////
-////#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN0)
-//#define GPIO_OUT1         	(GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-//							GPIO_PORTB | GPIO_PIN2)
-////#define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN2)
-//
-///* Pushbutton B1, labelled "User", is connected to GPIO PA0.  A high value will be sensed when the
-// * button is depressed. Note that the EXTI interrupt is configured.
-// */
-//
-//#define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
-//
+
+#define BOARD_NGPIOIN     0 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    0 /* Amount of GPIO Input w/ Interruption pins */
+
+#define GPIO_OUT1         	(GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+							GPIO_PORTB | GPIO_PIN2)
+
 #define GPIO_OTGFS_VBUS    (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
                             GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
-//
-///* Sporadic scheduler instrumentation. This configuration has been used for evaluating the NuttX
-// * sporadic scheduler.  In this evaluation, two GPIO outputs are used.  One indicating the priority
-// * (high or low) of the sporadic thread and one indicating where the thread is running or not.
-// *
-// * There is nothing special about the pin selections:
-// *
-// *   Arduino D2 PJ1 - Indicates priority1
-// *   Arduino D4 PJ0 - Indicates that the thread is running
-// */
-//
-//#define GPIO_SCHED_HIGHPRI (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-//                            GPIO_PORTJ | GPIO_PIN1)
-//#define GPIO_SCHED_RUNNING (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-//                            GPIO_PORTJ | GPIO_PIN0)
 
 /****************************************************************************************************
  * Public data
@@ -176,21 +153,9 @@ void weak_function stm32_spidev_initialize(void);
  *
  ****************************************************************************************************/
 
-#ifdef CONFIG_STM32_OTGFS
-void weak_function stm32_usbinitialize(void);
-#endif
-
-/****************************************************************************************************
- * Name: arch_sporadic_initialize
- *
- * Description:
- *   This configuration has been used for evaluating the NuttX sporadic scheduler.
- *
- ****************************************************************************************************/
-
-#ifdef CONFIG_SPORADIC_INSTRUMENTATION
-void arch_sporadic_initialize(void);
-#endif
+//#ifdef CONFIG_STM32_OTGFS
+//void weak_function stm32_usbinitialize(void);
+//#endif
 
 /****************************************************************************
  * Name: stm32_gpio_initialize

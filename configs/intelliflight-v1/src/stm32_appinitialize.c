@@ -124,16 +124,16 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#if defined(CONFIG_NUCLEO_SPI_TEST)
-  /* Create SPI interfaces */
-
-  ret = stm32_spidev_bus_test();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI interfaces: %d\n", ret);
-      return ret;
-    }
-#endif
+//#if defined(CONFIG_NUCLEO_SPI_TEST)
+//  /* Create SPI interfaces */
+//
+//  ret = stm32_spidev_bus_test();
+//  if (ret != OK)
+//    {
+//      syslog(LOG_ERR, "ERROR: Failed to initialize SPI interfaces: %d\n", ret);
+//      return ret;
+//    }
+//#endif
 
 //#if defined(CONFIG_MMCSD)
 //	/* Configure SDIO */
