@@ -1,8 +1,9 @@
 /****************************************************************************
- * configs/intelliflight/src/stm32_userleds.c
+ * configs/nucleo-144/src/stm32_buttons.c
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,66 +40,81 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <debug.h>
+#include <stddef.h>
+#include <errno.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/board.h>
+
+#include <arch/board/board.h>
+
+#include "../../../intelliflight-v1/nucleo-144/src/nucleo-144.h"
 #include "stm32_gpio.h"
-#include "intelliflight-v1.h"
 
-#ifndef CONFIG_ARCH_LEDS
+#ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_userled_initialize
+ * Name: board_button_initialize
  *
  * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the
- *   board_userled_initialize() is available to initialize the LED from user
- *   application logic.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
-void board_userled_initialize(void)
+void board_button_initialize(void)
 {
-  stm32_configgpio(GPIO_LD2);
+  stm32_configgpio(GPIO_BTN_USER);
 }
 
 /****************************************************************************
- * Name: board_userled
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled() is
- *  available to control the LED from user application logic.
- *
+ * Name: board_buttons
  ****************************************************************************/
 
-void board_userled(int led, bool ledon)
+uint32_t board_buttons(void)
 {
-  if (led == BOARD_STATUS_LED)
+  return stm32_gpioread(GPIO_BTN_USER) ? 1 : 0;
+}
+
+/************************************************************************************
+ * Button support.
+ *
+ * Description:
+ *   board_button_initialize() must be called to initialize button resources.  After
+ *   that, board_buttons() may be called to collect the current state of all
+ *   buttons or board_button_irq() may be called to register button interrupt
+ *   handlers.
+ *
+ *   After board_button_initialize() has been called, board_buttons() may be called to
+ *   collect the state of all buttons.  board_buttons() returns an 32-bit bit set
+ *   with each bit associated with a button.  See the BUTTON_*_BIT
+ *   definitions in board.h for the meaning of each bit.
+ *
+ *   board_button_irq() may be called to register an interrupt handler that will
+ *   be called when a button is depressed or released.  The ID value is a
+ *   button enumeration value that uniquely identifies a button resource. See the
+ *   BUTTON_* definitions in board.h for the meaning of enumeration
+ *   value.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQBUTTONS
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+{
+  int ret = -EINVAL;
+
+  if (id == BUTTON_USER)
     {
-      stm32_gpiowrite(GPIO_LD2, !ledon);
+      ret = stm32_gpiosetevent(GPIO_BTN_USER, true, true, true, irqhandler, arg);
     }
+
+  return ret;
 }
-
-/****************************************************************************
- * Name: board_userled_all
- *
- * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
- *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the board_userled_all() is
- *  available to control the LED from user application logic.  NOTE:  since
- *  there is only a single LED on-board, this is function is not very useful.
- *
- ****************************************************************************/
-
-void board_userled_all(uint8_t ledset)
-{
-  stm32_gpiowrite(GPIO_LD2, (ledset & BOARD_STATUS_LED_BIT) != 0);
-}
-
-#endif /* !CONFIG_ARCH_LEDS */
+#endif
+#endif /* CONFIG_ARCH_BUTTONS */

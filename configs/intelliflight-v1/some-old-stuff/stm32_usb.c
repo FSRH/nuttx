@@ -51,11 +51,10 @@
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
-
+#include "../../intelliflight-v1/some-old-stuff/intelliflight-v1.h"
 #include "up_arch.h"
 #include "stm32_otg.h"
 #include "stm32_gpio.h"
-#include "intelliflight-v1.h"
 
 #ifdef CONFIG_STM32F7_OTGFS
 

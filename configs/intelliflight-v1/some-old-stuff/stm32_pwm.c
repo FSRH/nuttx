@@ -1,8 +1,9 @@
 /************************************************************************************
- * configs/intelliflight/src/stm32_ostest.c
+ * configs/nucleo-144/src/stm32_pwm.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Philippe Coval <p.coval@samsung.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,76 +40,124 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
+#include <errno.h>
 #include <debug.h>
+#include <sys/types.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/board.h>
+#include <nuttx/drivers/pwm.h>
 #include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
-#include "up_internal.h"
-#include "intelliflight-v1.h"
+#include "stm32_pwm.h"
+
+#include "../../intelliflight-v1/some-old-stuff/intelliflight-v1.h"
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration ********************************************************************/
 
-#undef HAVE_FPU
-#if defined(CONFIG_ARCH_FPU) && !defined(CONFIG_TESTING_OSTEST_FPUTESTDISABLE) && \
-    defined(CONFIG_TESTING_OSTEST_FPUSIZE) && defined(CONFIG_SCHED_WAITPID) && \
-    !defined(CONFIG_DISABLE_SIGNALS)
-#    define HAVE_FPU 1
+#define HAVE_PWM 1
+#ifndef CONFIG_PWM
+#  undef HAVE_PWM
 #endif
-
-#ifdef HAVE_FPU
-
-#if CONFIG_TESTING_OSTEST_FPUSIZE != (4*SW_FPU_REGS)
-#  error "CONFIG_TESTING_OSTEST_FPUSIZE has the wrong size"
-#endif
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-
-static uint32_t g_saveregs[XCPTCONTEXT_REGS];
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/* Given an array of size CONFIG_TESTING_OSTEST_FPUSIZE, this function will return
- * the current FPU registers.
- */
+/************************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
 
-void arch_getfpu(FAR uint32_t *fpusave)
+int stm32_pwm_setup(void)
 {
-  irqstate_t flags;
+#ifdef HAVE_PWM
+  static bool initialized = false;
+  struct pwm_lowerhalf_s *pwm;
+  int ret;
 
-  /* Take a snapshot of the thread context right now */
+  /* Have we already initialized? */
 
-  flags = enter_critical_section();
-  up_saveusercontext(g_saveregs);
+  if (!initialized)
+    {
+      /* Call stm32_pwminitialize() to get an instance of the PWM interface */
 
-  /* Return only the floating register values */
+#if defined(CONFIG_STM32F7_TIM1_PWM)
+      pwm = stm32_pwminitialize(1);
+      if (!pwm)
+        {
+          aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
+          return -ENODEV;
+        }
 
-  memcpy(fpusave, &g_saveregs[REG_S0], (4*SW_FPU_REGS));
-  leave_critical_section(flags);
+      ret = pwm_register("/dev/pwm0", pwm);
+      if (ret < 0)
+        {
+          aerr("ERROR: pwm_register failed: %d\n", ret);
+          return ret;
+        }
+#endif
+
+#if defined(CONFIG_STM32F7_TIM2_PWM)
+      pwm = stm32_pwminitialize(2);
+      if (!pwm)
+        {
+          aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
+          return -ENODEV;
+        }
+
+      ret = pwm_register("/dev/pwm1", pwm);
+      if (ret < 0)
+        {
+          aerr("ERROR: pwm_register failed: %d\n", ret);
+          return ret;
+        }
+#endif
+
+#if defined(CONFIG_STM32F7_TIM3_PWM)
+      pwm = stm32_pwminitialize(3);
+      if (!pwm)
+        {
+          aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
+          return -ENODEV;
+        }
+
+      ret = pwm_register("/dev/pwm2", pwm);
+      if (ret < 0)
+        {
+          aerr("ERROR: pwm_register failed: %d\n", ret);
+          return ret;
+        }
+#endif
+
+#if defined(CONFIG_STM32F7_TIM4_PWM)
+      pwm = stm32_pwminitialize(4);
+      if (!pwm)
+        {
+          aerr("ERROR: Failed to get the STM32F7 PWM lower half\n");
+          return -ENODEV;
+        }
+
+      ret = pwm_register("/dev/pwm3", pwm);
+      if (ret < 0)
+        {
+          aerr("ERROR: pwm_register failed: %d\n", ret);
+          return ret;
+        }
+#endif
+      /* Now we are initialized */
+
+      initialized = true;
+    }
+
+  return OK;
+#else
+  return -ENODEV;
+#endif
 }
-
-/* Given two arrays of size CONFIG_TESTING_OSTEST_FPUSIZE this function
- * will compare them and return true if they are identical.
- */
-
-bool arch_cmpfpu(FAR const uint32_t *fpusave1, FAR const uint32_t *fpusave2)
-{
-  return memcmp(fpusave1, fpusave2, (4*SW_FPU_REGS)) == 0;
-}
-
-#endif /* HAVE_FPU */
