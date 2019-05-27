@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/intelliflight/src/stm32_autoleds.c
+ * configs/intelliflight-v1/src/stm32_autoleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,9 +43,8 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-
+#include "../../intelliflight-v1/src/intelliflight-v1.h"
 #include "stm32_gpio.h"
-#include "intelliflight-v1.h"
 
 #ifdef CONFIG_ARCH_LEDS
 

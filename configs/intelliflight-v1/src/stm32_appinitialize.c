@@ -1,8 +1,10 @@
 /****************************************************************************
- * config/intelliflight/src/stm32_appinitialize.c
+ * config/intelliflight-v1/src/stm32_appinitialize.c
  *
- *   Copyright (C) 2015-2016, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Mark Olsson <post@markolsson.se>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,8 +46,8 @@
 #include <debug.h>
 #include <syslog.h>
 
-#include "intelliflight-v1.h"
 #include <nuttx/leds/userled.h>
+#include "../../intelliflight-v1/src/intelliflight-v1.h"
 
 /****************************************************************************
  * Public Functions
@@ -78,7 +80,7 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-	int ret;
+  int ret;
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
@@ -124,39 +126,39 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-//#if defined(CONFIG_NUCLEO_SPI_TEST)
-//  /* Create SPI interfaces */
-//
-//  ret = stm32_spidev_bus_test();
-//  if (ret != OK)
-//    {
-//      syslog(LOG_ERR, "ERROR: Failed to initialize SPI interfaces: %d\n", ret);
-//      return ret;
-//    }
-//#endif
+#if defined(CONFIG_NUCLEO_SPI_TEST)
+  /* Create SPI interfaces */
 
-//#if defined(CONFIG_MMCSD)
-//	/* Configure SDIO */
-//	/* Initialize the SDIO block driver */
-//
-//	ret = stm32_sdio_initialize();
-//	if (ret != OK)
-//	{
-//		ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
-//		return ret;
-//	}
-//#endif
-
-#if defined(CONFIG_PWM)
-	/* Initialize PWM and register the PWM device */
-
-	ret = stm32_pwm_setup();
-	if (ret < 0) {
-		syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
-	}
+  ret = stm32_spidev_bus_test();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI interfaces: %d\n", ret);
+      return ret;
+    }
 #endif
 
-	UNUSED(ret);
-	return OK;
-}
+#if defined(CONFIG_MMCSD)
+  /* Configure SDIO */
+  /* Initialize the SDIO block driver */
 
+  ret = stm32_sdio_initialize();
+  if (ret != OK)
+    {
+      ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#if defined(CONFIG_PWM)
+  /* Initialize PWM and register the PWM device */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
+  return OK;
+}

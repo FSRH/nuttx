@@ -1,8 +1,11 @@
 /************************************************************************************
- * configs/intelliflight/include/board.h
+ * configs/intelliflight-v1/include/board.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *           Mark Olsson <post@markolsson.se>
+ *           David Sidrane <david_s5@nscdg.com>
+ *           Bob Feretich <bob.feretich@rafresearch.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -248,16 +251,73 @@
 #define STM32_APB2_TIM10_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
-///* Timer Frequencies */
-//
-//#define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
-//#define BOARD_TIM2_FREQUENCY    STM32_PCLK1_FREQUENCY
-//#define BOARD_TIM3_FREQUENCY    STM32_PCLK1_FREQUENCY
-//#define BOARD_TIM4_FREQUENCY    STM32_PCLK1_FREQUENCY
-//#define BOARD_TIM5_FREQUENCY    STM32_PCLK1_FREQUENCY
-//#define BOARD_TIM6_FREQUENCY    STM32_PCLK1_FREQUENCY
-//#define BOARD_TIM7_FREQUENCY    STM32_PCLK1_FREQUENCY
-//#define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
+/* Timer Frequencies */
+
+#define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
+#define BOARD_TIM2_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM3_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM4_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM5_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM6_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM7_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
+
+/* SDMMC dividers.  Note that slower clocking is required when DMA is disabled
+ * in order to avoid RX overrun/TX underrun errors due to delayed responses
+ * to service FIFOs in interrupt driven mode.  These values have not been
+ * tuned!!!
+ *
+ * SDMMCCLK=48MHz, SDMMC_CK=SDMMCCLK/(118+2)=400 KHz
+ */
+
+#define STM32_SDMMC_INIT_CLKDIV         (118 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+
+/* DMA ON:  SDMMCCLK=48MHz, SDMMC_CK=SDMMCCLK/(1+2)=16 MHz
+ * DMA OFF: SDMMCCLK=48MHz, SDMMC_CK=SDMMCCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define STM32_SDMMC_MMCXFR_CLKDIV     (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#else
+#  define STM32_SDMMC_MMCXFR_CLKDIV     (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#endif
+
+/* DMA ON:  SDMMCCLK=48MHz, SDMMC_CK=SDMMCCLK/(1+2)=16 MHz
+ * DMA OFF: SDMMCCLK=48MHz, SDMMC_CK=SDMMCCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define STM32_SDMMC_SDXFR_CLKDIV      (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#else
+#  define STM32_SDMMC_SDXFR_CLKDIV      (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#endif
+
+#if defined(CONFIG_STM32F7_SDMMC2)
+#  define GPIO_SDMMC2_D0 GPIO_SDMMC2_D0_1
+#  define GPIO_SDMMC2_D1 GPIO_SDMMC2_D1_1
+#  define GPIO_SDMMC2_D2 GPIO_SDMMC2_D2_1
+#  define GPIO_SDMMC2_D3 GPIO_SDMMC2_D3_1
+#endif
+
+/* DMA Channl/Stream Selections *****************************************************/
+
+/* Stream selections are arbitrary for now but might become important in the future
+ * if we set aside more DMA channels/streams.
+ *
+ * SDMMC DMA is on DMA2
+ *
+ * SDMMC1 DMA
+ *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3
+ *   DMAMAP_SDMMC1_2 = Channel 4, Stream 6
+ *
+ * SDMMC2 DMA
+ *   DMAMAP_SDMMC2_1 = Channel 11, Stream 0
+ *   DMAMAP_SDMMC3_2 = Channel 11, Stream 5
+ */
+
+#define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
+#define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
+
 
 /* FLASH wait states
  *
@@ -274,12 +334,10 @@
 #define BOARD_FLASH_WAITSTATES 7
 
 /* LED definitions ******************************************************************/
-/* The STM32F769I-DISCO board has numerous LEDs but only one, LD1 located near the
- * reset button, that can be controlled by software (LD2 is a power indicator, LD3-6
- * indicate USB status, LD7 is controlled by the ST-Link).
- *
- * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino interface.
- * One end of LD1 is grounded so a high output on PI1 will illuminate the LED.
+
+/* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a Blue
+ * LED and LD3 a Red LED, that can be controlled by software. The following
+ * definitions assume the default Solder Bridges are installed.
  *
  * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any way.
  * The following definitions are used to access individual LEDs.
@@ -323,217 +381,124 @@
 #define LED_ASSERTION                2 /* LD1=no change */
 #define LED_PANIC                    3 /* LD1=flashing */
 
-/* Button definitions ***************************************************************/
-/* The STM32F7 Discovery supports one button:  Pushbutton B1, labelled "User", is
- * connected to GPIO PA0.  A high value will be sensed when the button is depressed.
+/* Thus if the Green LED is statically on, NuttX has successfully booted and
+ * is, apparently, running normally.  If the Red LED is flashing at
+ * approximately 2Hz, then a fatal error has been detected and the system
+ * has halted.
  */
 
-#define BUTTON_USER        0
-#define NUM_BUTTONS        1
-#define BUTTON_USER_BIT    (1 << BUTTON_USER)
+/* Button definitions ***************************************************************/
+
+/* The STM32F7 Discovery supports one button:  Pushbutton B1, labeled "User", is
+ * connected to GPIO PI11.  A high value will be sensed when the button is depressed.
+ */
+
+//#define BUTTON_USER        0
+//#define NUM_BUTTONS        1
+//#define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
 /* Alternate function pin selections ************************************************/
 
-/*PWM
- *
- */
+/* TIM */
 
-// PWMLED0
-//#define GPIO_TIM1_CH4OUT GPIO_TIM1_CH4OUT_2
-//// plain PWM's
-//#define GPIO_TIM3_CH3OUT GPIO_TIM3_CH3OUT_1
-//#define GPIO_TIM3_CH4OUT GPIO_TIM3_CH4OUT_1
 #define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_2
-//#define GPIO_TIM1_CH2OUT GPIO_TIM1_CH2OUT_2
-//#define GPIO_TIM1_CH3OUT GPIO_TIM1_CH3OUT_2
-//#define GPIO_TIM2_CH3OUT GPIO_TIM2_CH3OUT_2
-//#define GPIO_TIM2_CH4OUT GPIO_TIM2_CH4OUT_2
-//#define GPIO_TIM4_CH3OUT GPIO_TIM4_CH3OUT_2
-//#define GPIO_TIM4_CH4OUT GPIO_TIM4_CH4OUT_2
-
-//#define BOARD_NPWM 10
-
-/* SPI1: ICM20689 Gyro
- *
- *   FUNCTION  GPIO
- *   --------- -----
- *   SPI1_SCK  PA5
- *   SPI1_MISO PA6
- *   SPI1_MOSI PA7
- *
- *   NOTE:
- *   	NSS is not necessary, since there is only one device
- */
-
-#define GPIO_SPI1_SCK GPIO_SPI1_SCK_1
-#define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
-#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
-
-/* SPI2:
- *
- *   FUNCTION  GPIO
- *   --------- -----
- *   SPI2_SCK  PD3
- *   SPI2_MISO PB14
- *   SPI2_MOSI PB15
- *
- *   NOTE:
- *   	Use only as master; there is no NSS
- *
- *
- * SPI2 DMA:
- *   DMAMAP_SPI2_RX = Channel 0, Stream 3
- *   DMAMAP_SPI2_TX = Channel 0, Stream 4
- *
- */
-
-#define GPIO_SPI2_SCK GPIO_SPI2_SCK_4
-#define GPIO_SPI2_MISO GPIO_SPI2_MISO_1
-#define GPIO_SPI2_MOSI GPIO_SPI2_MOSI_1
-
-/* SPI3:
- *
- *   FUNCTION  GPIO
- *   --------- -----
- *   SPI3_SCK  PB3
- *   SPI3_MISO PB4
- *   SPI3_MOSI PB5
- *   SPI3_NSS  PA15
- */
-
-#define GPIO_SPI3_SCK GPIO_SPI3_SCK_1
-#define GPIO_SPI3_MISO GPIO_SPI3_MISO_1
-#define GPIO_SPI3_MOSI GPIO_SPI3_MOSI_2
-#define GPIO_SPI3_NSS GPIO_SPI3_NSS_1
-
-/*
- * SPI3 DMA:
- *   DMAMAP_SPI3_RX_1 = Channel 0, Stream 0
- *   DMAMAP_SPI3_RX_2 = Channel 0, Stream 2
- *
- *   DMAMAP_SPI3_TX_1 = Channel 0, Stream 5
- *   DMAMAP_SPI3_TX_2 = Channel 0, Stream 7
- */
-#define DMAMAP_SPI3_RX DMAMAP_SPI3_RX_1
-#define DMAMAP_SPI3_TX DMAMAP_SPI3_TX_1
-
-/* SPI4:
- *
- *   FUNCTION  GPIO  DEVICE
- *   --------- ----- --------
- *   SPI4_SCK  PE2
- *   SPI4_MISO PE5
- *   SPI4_MOSI PE6
- *   --------- ----- --------
- *   SPI4_NSS0  PA2   BMP280 Temperature
- *   SPI4_NSS1  PA3   AK8963N Pressure
- */
-
-#define GPIO_SPI4_SCK GPIO_SPI4_SCK_1
-#define GPIO_SPI4_MISO GPIO_SPI4_MISO_1
-#define GPIO_SPI4_MOSI GPIO_SPI4_MOSI_1
-
-#define GPIO_SPI4_NSS0 (GPIO_OUTPUT|GPIO_PULLUP|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN2)
-#define GPIO_SPI4_NSS1 (GPIO_OUTPUT|GPIO_PULLUP|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN3)
-
-/* CAN1:
- *
- *   FUNCTION  GPIO
- *   --------- -----
- *   CAN1_RX   PB8
- *   CAN1_TX   PB9
- */
-
-/* UART4:
- *
- *   FUNCTION  GPIO
- *   --------- -----
- *   UART4_RX  PA1
- *   UART4_TX  PA0
- */
-
-#define GPIO_UART4_RX GPIO_UART4_RX_1
-#define GPIO_UART4_TX GPIO_UART4_TX_1
-
-/* UART5:
- *
- *   FUNCTION  GPIO
- *   --------- -----
- *   UART5_RX  PB12
- *   UART5_TX  PB13
- */
-
-#define GPIO_UART5_RX GPIO_UART5_RX_3
-#define GPIO_UART5_TX GPIO_UART5_TX_3
+//#define GPIO_TIM2_CH1OUT GPIO_TIM2_CH1OUT_1
+//#define GPIO_TIM3_CH1OUT GPIO_TIM3_CH1OUT_1
+//#define GPIO_TIM4_CH1OUT GPIO_TIM4_CH1OUT_1
 
 /* UART7:
- *
- *   FUNCTION  GPIO
- *   --------- -----
- *   UART7_RX  PE7
- *   UART7_TX  PE8
+ * Use  UART7 and the USB virtual COM port
  */
 
+//#if defined(CONFIG_NUCLEO_CONSOLE_VIRTUAL)
 #define GPIO_UART7_RX GPIO_UART7_RX_1
 #define GPIO_UART7_TX GPIO_UART7_TX_1
+//#endif
 
-/* UART8:
+/* DMA channels *************************************************************/
+
+/* ADC */
+
+//#define ADC1_DMA_CHAN DMAMAP_ADC1_1
+//#define ADC2_DMA_CHAN DMAMAP_ADC2_1
+//#define ADC3_DMA_CHAN DMAMAP_ADC3_1
+
+/* SPI
  *
- *   FUNCTION  GPIO
- *   --------- -----
- *   UART8_RX  PE0
- *   UART8_TX  PE1
  *
- *   ______________
- *   IMPORTANT NOTE:
- *   	Do NOT re-define!!
- *   	There is only one possible pin assignment!
+ *  PA6   SPI1_MISO CN12-13
+ *  PA7   SPI1_MOSI CN12-15
+ *  PA5   SPI1_SCK  CN12-11
+ *
+ *  PB14  SPI2_MISO CN12-28
+ *  PB15  SPI2_MOSI CN12-26
+ *  PB13  SPI2_SCK  CN12-30
+ *
+ *  PB4   SPI3_MISO CN12-27
+ *  PB5   SPI3_MOSI CN12-29
+ *  PB3   SPI3_SCK  CN12-31
  */
 
-/* SDMMC */
+//#define GPIO_SPI1_MISO   GPIO_SPI1_MISO_1
+//#define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_1
+//#define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1
+//
+//#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1
+//#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
+//#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_3
+//
+//#define GPIO_SPI3_MISO   GPIO_SPI3_MISO_1
+//#define GPIO_SPI3_MOSI   GPIO_SPI3_MOSI_2
+//#define GPIO_SPI3_SCK    GPIO_SPI3_SCK_1
 
-/* Stream selections are arbitrary for now but might become important in the future
- * if we set aside more DMA channels/streams.
+/* I2C
  *
- * SDIO DMA
- *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3
- *   DMAMAP_SDMMC1_2 = Channel 4, Stream 6
  *
- *   DMAMAP_SDMMC2_1 = Channel 11, Stream 0
- *   DMAMAP_SDMMC2_2 = Channel 11, Stream 5
- */
+ *  PB8   I2C1_SCL CN12-3
+ *  PB9   I2C1_SDA CN12-5
 
-#define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
-//#define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
-
-/* SDIO dividers.  Note that slower clocking is required when DMA is disabled
- * in order to avoid RX overrun/TX underrun errors due to delayed responses
- * to service FIFOs in interrupt driven mode.  These values have not been
- * tuned!!!
+ *  PB10   I2C2_SCL CN11-51
+ *  PB11 I2C2_SDA CN12-18
  *
- * SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
+ *  PA8   I2C3_SCL CN12-23
+ *  PC9   I2C3_SDA CN12-1
+ *
  */
 
-#define STM32_SDMMC_INIT_CLKDIV      (118 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+//#define GPIO_I2C1_SCL GPIO_I2C1_SCL_2
+//#define GPIO_I2C1_SDA GPIO_I2C1_SDA_2
+//
+//#define GPIO_I2C2_SCL GPIO_I2C2_SCL_1
+//#define GPIO_I2C2_SDA GPIO_I2C2_SDA_1
+//
+//#define GPIO_I2C3_SCL GPIO_I2C3_SCL_1
+//#define GPIO_I2C3_SDA GPIO_I2C3_SDA_1
 
-/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
- * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+/* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
+ *
+ *   STM32 F7 BOARD        LAN8742A
+ *   GPIO     SIGNAL       PIN NAME
+ *   -------- ------------ -------------
+ *   PG11     RMII_TX_EN   TXEN
+ *   PG13     RMII_TXD0    TXD0
+ *   PB13     RMII_TXD1    TXD1
+ *   PC4      RMII_RXD0    RXD0/MODE0
+ *   PC5      RMII_RXD1    RXD1/MODE1
+ *   PG2      RMII_RXER    RXER/PHYAD0 -- Not used
+ *   PA7      RMII_CRS_DV  CRS_DV/MODE2
+ *   PC1      RMII_MDC     MDC
+ *   PA2      RMII_MDIO    MDIO
+ *   N/A      NRST         nRST
+ *   PA1      RMII_REF_CLK nINT/REFCLK0
+ *   N/A      OSC_25M      XTAL1/CLKIN
+ *
+ * The PHY address is either 0 or 1, depending on the state of PG2 on reset.
+ * PG2 is not controlled but appears to result in a PHY address of 0.
  */
 
-#ifdef CONFIG_SDIO_DMA
-#  define STM32_SDMMC_MMCXFR_CLKDIV  (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#else
-#  define STM32_SDMMC_MMCXFR_CLKDIV  (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#endif
-
-/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
- * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
- */
-
-#ifdef CONFIG_SDIO_DMA
-#  define STM32_SDMMC_SDXFR_CLKDIV   (1 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#else
-#  define STM32_SDMMC_SDXFR_CLKDIV   (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#endif
+//#define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
+//#define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
+//#define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_1
 
 #endif  /* __CONFIG_INTELLIFLIGHT_V1_INCLUDE_BOARD_H */
+

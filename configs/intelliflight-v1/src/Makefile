@@ -1,5 +1,5 @@
 ############################################################################
-# configs/intelliflight/src/Makefile
+# configs/intelliflight-v1/src/Makefile
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -36,12 +36,16 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = stm32_boot.c stm32_spi.c
+CSRCS = stm32_boot.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
 else
 CSRCS += stm32_userleds.c
+endif
+
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += stm32_gpio.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
@@ -52,24 +56,28 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
 endif
 
-ifeq ($(CONFIG_ARCH_FPU),y)
-CSRCS += stm32_ostest.c
+ifeq ($(CONFIG_SPI),y)
+CSRCS += stm32_spi.c
 endif
 
-ifeq ($(CONFIG_SPORADIC_INSTRUMENTATION),y)
-CSRCS += stm32_sporadic.c
-endif
-
-ifeq ($(CONFIG_STM32F7_OTGFS),y)
-CSRCS += stm32_usb.c
+ifeq ($(CONFIG_ADC),y)
+CSRCS += stm32_adc.c
 endif
 
 ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif
 
-ifeq ($(CONFIG_DEV_GPIO),y)
-CSRCS += stm32_gpio.c
+ifeq ($(CONFIG_MMCSD),y)
+CSRCS += stm32_sdio.c
+endif
+
+ifeq ($(CONFIG_STM32F7_OTGFS),y)
+CSRCS += stm32_usb.c
+endif
+
+ifeq ($(CONFIG_STM32F7_BBSRAM),y)
+CSRCS += stm32_bbsram.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

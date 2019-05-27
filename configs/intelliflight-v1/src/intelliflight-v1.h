@@ -1,8 +1,10 @@
-/****************************************************************************************************
- * configs/intelliflight/src/intelliflight-v1.h
+/************************************************************************************
+ * configs/intelliflight-v1/src/intelliflight-v1.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Mark Olsson <post@markolsson.se>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,61 +33,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #ifndef __CONFIGS_INTELLIFLIGHT_V1_SRC_INTELLIFLIGHT_V1__H
 #define __CONFIGS_INTELLIFLIGHT_V1_SRC_INTELLIFLIGHT_V1__H
 
-/****************************************************************************************************
+/************************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
-/****************************************************************************************************
+/************************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ************************************************************************************/
+
+/* Configuration ********************************************************************/
+
 /* procfs File System */
-
-/* Assume that we have everything */
-
-//#define HAVE_USBDEV     1
-//#define HAVE_USBHOST    1
-//#define HAVE_USBMONITOR 1
-//#define HAVE_SDIO       1
-//#define HAVE_CS43L22    1
-//#define HAVE_RTC_DRIVER 1
-//#define HAVE_NETMONITOR 1
-//#define HAVE_HCIUART    1
-
-/* Can't support USB host or device features if USB OTG FS is not enabled */
-
-//#ifndef CONFIG_STM32_OTGFS
-//#  undef HAVE_USBDEV
-//#  undef HAVE_USBHOST
-//#  undef HAVE_USBMONITOR
-//#endif
-
-/* Can't support USB device monitor if USB device is not enabled */
-
-//#ifndef CONFIG_USBDEV
-//#  undef HAVE_USBDEV
-//#  undef HAVE_USBMONITOR
-//#endif
-
-/* Can't support USB host is USB host is not enabled */
-
-#ifndef CONFIG_USBHOST
-#  undef HAVE_USBHOST
-#endif
-
-/* Check if we should enable the USB monitor before starting NSH */
-
-#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
-#  undef HAVE_USBMONITOR
-#endif
 
 #ifdef CONFIG_FS_PROCFS
 #  ifdef CONFIG_NSH_PROC_MOUNTPOINT
@@ -95,74 +62,148 @@
 #  endif
 #endif
 
-/* ItelliFlight v1 LEDs ***********************************************************************/
-/* This board has two LED's:
- * - one system-controllable status LED: LED1.
- * - one user-controllable LED: LED2.
+/* IntelliFlight GPIO Pin Definitions **************************************************/
+/* LED
  *
- * LED1 is on when PC13 is high.
- * LED2 is on when PD12 is high.
+ * The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a
+ * Blue LED and LD3 a Red LED, that can be controlled by software. The following
+ * definitions assume the default Solder Bridges are installed.
  */
 
-#define GPIO_LED1          (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-                            GPIO_PORTC | GPIO_PIN13)
+#define GPIO_LED1      (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+                        GPIO_PORTC | GPIO_PIN13)
+#define GPIO_LED2      (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+                        GPIO_PORTD | GPIO_PIN12)
 
-#define GPIO_LED2          (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-                            GPIO_PORTD | GPIO_PIN12)
+#define GPIO_LED_GREEN GPIO_LD1
+#define GPIO_LED_BLUE  GPIO_LD2
+#define GPIO_LED_RED   GPIO_LD3
 
-/* ItelliFlight v1 GPIOs ***********************************************************************/
-/* This board has one user-controllable GPIO pin: PB2
+#define LED_DRIVER_PATH "/dev/userleds"
+
+/* GPIO
+ *
+ * This board has one user-controllable GPIO pin: PB2
  */
 
 #define BOARD_NGPIOIN     0 /* Amount of GPIO Input pins */
 #define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
 #define BOARD_NGPIOINT    0 /* Amount of GPIO Input w/ Interruption pins */
 
-#define GPIO_OUT1         	(GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-							GPIO_PORTB | GPIO_PIN2)
+#define GPIO_OUT1      (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+						GPIO_PORTB | GPIO_PIN2)
 
-#define GPIO_OTGFS_VBUS    (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
-                            GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
+/* BUTTONS
+ *
+ * The Blue pushbutton B1, labeled "User", is connected to GPIO PC13.  A high value
+ * will be sensed when the button is depressed.
+ * Note:
+ *    1) That the EXTI is included in the definition to enable an interrupt on this
+ *       IO.
+ *    2) The following definitions assume the default Solder Bridges are installed.
+ */
 
-/****************************************************************************************************
+//#define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
+
+/* SPI ***************************************************************************/
+
+//#define GPIO_SPI_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+//                        GPIO_OUTPUT_SET)
+//
+//#define GPIO_SPI1_CS0   (GPIO_SPI_CS | GPIO_PORTA | GPIO_PIN15)
+//#define GPIO_SPI1_CS1   (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN15)
+//#define GPIO_SPI1_CS2   (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN14)
+//#define GPIO_SPI1_CS3   (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN2)
+//#define GPIO_SPI2_CS0   (GPIO_SPI_CS | GPIO_PORTD | GPIO_PIN7)
+//#define GPIO_SPI2_CS1   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN1)
+//#define GPIO_SPI2_CS2   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN2)
+//#define GPIO_SPI2_CS3   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN3)
+//#define GPIO_SPI3_CS0   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN4)
+//#define GPIO_SPI3_CS1   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN5)
+//#define GPIO_SPI3_CS2   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN6)
+//#define GPIO_SPI3_CS3   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN7)
+
+/* Logical SPI Chip Selects used to index */
+
+//#define NUCLEO_SPI_BUS1_CS0  0
+//#define NUCLEO_SPI_BUS1_CS1  1
+//#define NUCLEO_SPI_BUS1_CS2  2
+//#define NUCLEO_SPI_BUS1_CS3  3
+//#define NUCLEO_SPI_BUS2_CS0  4
+//#define NUCLEO_SPI_BUS2_CS1  5
+//#define NUCLEO_SPI_BUS2_CS2  6
+//#define NUCLEO_SPI_BUS2_CS3  7
+//#define NUCLEO_SPI_BUS3_CS0  8
+//#define NUCLEO_SPI_BUS3_CS1  9
+//#define NUCLEO_SPI_BUS3_CS2  10
+//#define NUCLEO_SPI_BUS3_CS3  11
+
+#if defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_SDMMC2)
+# define HAVE_SDIO
+#endif
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_MMCSD_SDIO)
+#  undef HAVE_SDIO
+#endif
+
+#define SDIO_SLOTNO 0  /* Only one slot */
+
+#ifdef HAVE_SDIO
+#  if defined(CONFIG_STM32F7_SDMMC1)
+#    define GPIO_SDMMC1_NCD (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI | GPIO_PORTC | GPIO_PIN6)
+#  endif
+
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && (CONFIG_NSH_MMCSDSLOTNO != 0)
+#    warning "Only one MMC/SD slot, slot 0"
+#    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
+#  endif
+
+#  if defined(CONFIG_NSH_MMCSDMINOR)
+#    define SDIO_MINOR CONFIG_NSH_MMCSDMINOR
+#  else
+#    define SDIO_MINOR 0
+#  endif
+#endif
+
+/* USB OTG FS
+ *
+ * PA9  OTG_FS_VBUS VBUS sensing (also connected to the green LED)
+ * PC0  OTG_FS_PowerSwitchOn
+ * PD5  OTG_FS_Overcurrent
+ */
+
+//#define GPIO_OTGFS_VBUS   (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
+                           GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
+
+//#define GPIO_OTGFS_PWRON  (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
+                           GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN6)
+
+//#ifdef CONFIG_USBHOST
+//#  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT|\
+//                           GPIO_SPEED_100MHz|GPIO_PUSHPULL|\
+//                           GPIO_PORTG|GPIO_PIN7)
+//
+//#else
+//#  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
+//                           GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN7)
+//#endif
+
+/************************************************************************************
  * Public data
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/****************************************************************************************************
+/************************************************************************************
  * Public Functions
- ****************************************************************************************************/
-
-/****************************************************************************************************
- * Name: stm32_spidev_initialize
- *
- * Description:
- *   Called to configure SPI chip select GPIO pins for the intelliflight board.
- *
- ****************************************************************************************************/
-
-void weak_function stm32_spidev_initialize(void);
-
-/****************************************************************************************************
- * Name: stm32_usbinitialize
- *
- * Description:
- *   Called from stm32_usbinitialize very early in initialization to setup USB-related
- *   GPIO pins for the Mikroe-stm32f4 board.
- *
- ****************************************************************************************************/
-
-//#ifdef CONFIG_STM32_OTGFS
-//void weak_function stm32_usbinitialize(void);
-//#endif
+ ************************************************************************************/
 
 /****************************************************************************
  * Name: stm32_gpio_initialize
  *
  * Description:
  *   Initialize GPIO drivers for use with /apps/examples/gpio
- *   Added by: Stephan Rappensperger + Florian Hölzlwimmer
+ *   Added by: Stephan Rappensperger, Florian Hölzlwimmer
  *
  ****************************************************************************/
 
@@ -170,31 +211,104 @@ void weak_function stm32_spidev_initialize(void);
 int stm32_gpio_initialize(void);
 #endif
 
-/****************************************************************************************************
+/************************************************************************************
+ * Name: stm32_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the Nucleo-144 board.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_SPI)
+void stm32_spidev_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_spidev_bus_test
+ *
+ * Description:
+ *   Called to create the defined SPI buses and test them by initializing them
+ *   and sending the NUCLEO_SPI_TEST (no chip select).
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_NUCLEO_SPI_TEST)
+int stm32_spidev_bus_test(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_dma_alloc_init
+ *
+ * Description:
+ *   Called to create a FAT DMA allocator
+ *
+ * Returned Value:
+ *   0 on success or -ENOMEM
+ *
+ ************************************************************************************/
+
+void stm32_dma_alloc_init(void);
+
+#if defined (CONFIG_FAT_DMAMEMORY)
+int stm32_dma_alloc_init(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_sdio_initialize
+ *
+ * Description:
+ *   Called at application startup time to initialize the SCMMC functionality.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MMCSD
+int stm32_sdio_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_usbinitialize
+ *
+ * Description:
+ *   Called from stm32_usbinitialize very early in inialization to setup USB-related
+ *   GPIO pins for the nucleo-144 board.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32F7_OTGFS
+void stm32_usbinitialize(void);
+#endif
+
+/************************************************************************************
  * Name: stm32_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
 #endif
 
-/****************************************************************************************************
- * Name: stm32_usbhost_initialize
+/************************************************************************************
+ * Name: stm32_adc_setup
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality. This function will
- *   start a thread that will monitor for device connection/disconnection events.
+ *   Initialize ADC and register the ADC driver.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
-#if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
-#  error "The Intelliflight-v1 board does not support HOST OTG, only device!"
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_bbsram_int
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32F7_BBSRAM
+int stm32_bbsram_int(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_INTELLIFLIGHT_V1_SRC_INTELLIFLIGHT_V1_H */
-
+#endif /* __CONFIGS_NUCLEO_144_SRC_NUCLEO_144_H */

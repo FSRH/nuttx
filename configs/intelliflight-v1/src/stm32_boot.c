@@ -1,8 +1,9 @@
 /************************************************************************************
- * configs/intelliflight/src/stm32_boot.c
+ * configs/intelliflight-v1/src/stm32_boot.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,16 +45,8 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "../../intelliflight-v1/src/intelliflight-v1.h"
 #include "up_arch.h"
-#include "intelliflight-v1.h"
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
@@ -69,88 +62,67 @@
  *
  ************************************************************************************/
 
-void stm32_boardinitialize(void) {
-	int ret = 0;
-#if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
-    defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
-    defined(CONFIG_STM32F7_SPI5)
-	/*
-	 * Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-	 * stm32_spidev_initialize() has been brought into the link.
-	 */
-
-	if (stm32_spidev_initialize) {
-		stm32_spidev_initialize();
-	}
-#endif
-
-#ifdef CONFIG_SPORADIC_INSTRUMENTATION
-	/*
-	 * This configuration has been used for evaluating the NuttX sporadic scheduler.
-	 * The following caqll initializes the sporadic scheduler monitor.
-	 */
-
-	arch_sporadic_initialize();
-#endif
-
+void stm32_boardinitialize(void)
+{
+  int ret = 0;
 #ifdef CONFIG_ARCH_LEDS
-	/* Configure on-board LEDs if LED support has been selected. */
+  /* Configure on-board LEDs if LED support has been selected. */
 
-	board_autoled_initialize();
+  board_autoled_initialize();
+#endif
+
+#if defined(CONFIG_STM32F7_OTGFS) || defined(CONFIG_STM32F7_HOST)
+  stm32_usbinitialize();
+#endif
+
+#if defined(CONFIG_SPI)
+  /* Configure SPI chip selects */
+
+  stm32_spidev_initialize();
 #endif
 
 #ifdef CONFIG_DEV_GPIO
-	/* Initialize GPIO and register the GPIO device drivers. */
+  /* Initialize GPIO and register the GPIO device drivers. */
 
-	ret = stm32_gpio_initialize();
-	if (ret < 0) {
-		syslog(LOG_ERR, "ERROR: Failed to initialize GPIO Driver: %d\n", ret);
-	}
+  ret = stm32_gpio_initialize();
+  if (ret < 0) {
+	  syslog(LOG_ERR, "ERROR: Failed to initialize GPIO Driver: %d\n", ret);
+  }
 #endif
 
 #ifdef CONFIG_PWM
-	/* Initialize PWM and register the PWM device. */
+  /* Initialize PWM and register the PWM device. */
 
-	ret = stm32_pwm_setup();
-	if (ret < 0) {
-		syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
-	}
+  ret = stm32_pwm_setup();
+  if (ret < 0) {
+	  syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+  }
 #endif
-
-//#ifdef CONFIG_CAN
-//	/* Initialize CAN and register the CAN driver. */
-//
-//	ret = stm32_can_setup();
-//	if (ret < 0) {
-//		syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
-//	}
-//#endif
-
 }
 
 /************************************************************************************
- * Name: board_initialize
+ * Name: board_late_initialize
  *
  * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional initialization call
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional initialization call
  *   will be performed in the boot-up sequence to a function called
- *   board_initialize().  board_initialize() will be called immediately after
+ *   board_late_initialize().  board_late_initialize() will be called immediately after
  *   up_initialize() is called and just before the initial application is started.
  *   This additional initialization phase may be used, for example, to initialize
  *   board-specific device drivers.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void)
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
 {
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
-	/* Perform NSH initialization here instead of from the NSH.  This
-	 * alternative NSH initialization is necessary when NSH is ran in user-space
-	 * but the initialization function must run in kernel space.
-	 */
+  /* Perform NSH initialization here instead of from the NSH.  This
+   * alternative NSH initialization is necessary when NSH is ran in user-space
+   * but the initialization function must run in kernel space.
+   */
 
-	(void)board_app_initialize(0);
+  (void)board_app_initialize(0);
 #endif
 }
 #endif

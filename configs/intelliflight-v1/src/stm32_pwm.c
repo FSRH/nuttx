@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/nucleo-144/src/stm32_pwm.c
+ * configs/intelliflight-v1/src/stm32_pwm.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,8 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "stm32_pwm.h"
-#include "intelliflight-v1.h"
+
+#include "../../intelliflight-v1/src/intelliflight-v1.h"
 
 /************************************************************************************
  * Pre-processor Definitions

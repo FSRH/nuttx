@@ -1,3 +1,9 @@
+/************************************************************************************
+ *
+ * config/intelliflight-v1/src/stm32_appinitialize.c
+ *
+ ************************************************************************************/
+
 #include <nuttx/config.h>
 
 #include <stdbool.h>
@@ -12,7 +18,8 @@
 
 #include "chip.h"
 #include "stm32_gpio.h"
-#include "intelliflight-v1.h"
+
+#include "../../intelliflight-v1/src/intelliflight-v1.h"
 
 #if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)
 
