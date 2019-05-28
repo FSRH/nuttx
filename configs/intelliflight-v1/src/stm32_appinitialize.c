@@ -149,6 +149,15 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#if defined(CONFIG_DEV_GPIO)
+  /* Initialize GPIO and register the GPIO device drivers. */
+
+  ret = stm32_gpio_initialize();
+  if (ret < 0) {
+	  syslog(LOG_ERR, "ERROR: Failed to initialize GPIO Driver: %d\n", ret);
+  }
+#endif
+
 #if defined(CONFIG_PWM)
   /* Initialize PWM and register the PWM device */
 
