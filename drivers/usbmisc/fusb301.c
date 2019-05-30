@@ -120,7 +120,7 @@ static const struct file_operations g_fusb301ops =
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
- #endif
+#endif
 };
 
 /****************************************************************************
@@ -410,7 +410,7 @@ static int fusb301_set_state(FAR struct fusb301_dev_s *priv,
  * Name: fusb301_read_status
  *
  * Description:
- *   Clear read status register
+ *   Read status register
  *
  ****************************************************************************/
 
@@ -848,7 +848,11 @@ int fusb301_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Prepare interrupt line and handler. */
 
-  priv->config->irq_clear(config);
+  if (priv->config->irq_clear)
+    {
+      priv->config->irq_clear(config);
+    }
+
   priv->config->irq_attach(config, fusb301_int_handler, priv);
   priv->config->irq_enable(config, false);
 
