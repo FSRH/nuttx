@@ -66,7 +66,7 @@
 
 void board_button_initialize(void)
 {
-//  stm32_configgpio(GPIO_BTN_USER);
+  stm32_configgpio(GPIO_BTN_USER);
 }
 
 /****************************************************************************
@@ -75,7 +75,7 @@ void board_button_initialize(void)
 
 uint32_t board_buttons(void)
 {
-//  return stm32_gpioread(GPIO_BTN_USER) ? 1 : 0;
+  return stm32_gpioread(GPIO_BTN_USER) ? 1 : 0;
 }
 
 /************************************************************************************

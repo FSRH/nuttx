@@ -113,22 +113,22 @@
 /* ItelliFlight v1 GPIOs ***********************************************************************/
 /* This board has one user-controllable GPIO pin: PB2
  */
+
+#define BOARD_NGPIOIN     0 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    0 /* Amount of GPIO Input w/ Interruption pins */
 //
-//#define BOARD_NGPIOIN     0 /* Amount of GPIO Input pins */
-//#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
-//#define BOARD_NGPIOINT    0 /* Amount of GPIO Input w/ Interruption pins */
-////
-////#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN0)
-//#define GPIO_OUT1         	(GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-//							GPIO_PORTB | GPIO_PIN2)
-////#define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN2)
-//
-///* Pushbutton B1, labelled "User", is connected to GPIO PA0.  A high value will be sensed when the
-// * button is depressed. Note that the EXTI interrupt is configured.
-// */
-//
-//#define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
-//
+//#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN0)
+#define GPIO_OUT1         	(GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+							GPIO_PORTB | GPIO_PIN2)
+//#define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN2)
+
+/* Pushbutton B1, labelled "User", is connected to GPIO PA0.  A high value will be sensed when the
+ * button is depressed. Note that the EXTI interrupt is configured.
+ */
+
+#define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
+
 #define GPIO_OTGFS_VBUS    (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
                             GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
 //

@@ -378,10 +378,10 @@
 //#define BOARD_NPWM 10
 
 //#define DEV_PWMLED0 "/dev/pwmled0"
-#define DEV_PWM1 "/dev/pwm1"
-#define DEV_PWM2 "/dev/pwm2"
-#define DEV_PWM3 "/dev/pwm3"
-#define DEV_PWM4 "/dev/pwm4"
+//#define DEV_PWM1 "/dev/pwm1"
+//#define DEV_PWM2 "/dev/pwm2"
+//#define DEV_PWM3 "/dev/pwm3"
+//#define DEV_PWM4 "/dev/pwm4"
 //#define DEV_PWM5 "/dev/pwm5"
 //#define DEV_PWM6 "/dev/pwm6"
 //#define DEV_PWM7 "/dev/pwm7"
