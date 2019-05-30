@@ -1,8 +1,8 @@
 /****************************************************************************
- * graphics/nxbe/nxbe_visible.c
+ * config/nucleo-f303ze/src/stm32_ssd1306.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,84 +39,86 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/nx/nxglib.h>
+#include <nuttx/board.h>
+#include <nuttx/lcd/lcd.h>
+#include <nuttx/lcd/ssd1306.h>
+#include <nuttx/i2c/i2c_master.h>
 
-#include "nxbe.h"
-#include "nxmu.h"
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-struct nxbe_visible_s
-{
-  struct nxbe_clipops_s cops;
-  bool visible;
-};
+#include "stm32.h"
+#include "nucleo-f303ze.h"
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_LCD_MAXPOWER
+#  define CONFIG_LCD_MAXPOWER 1
+#endif
 
 /****************************************************************************
- * Name: nxbe_clipvisible
+ * Private Data
  ****************************************************************************/
 
-static void nxbe_clipvisible(FAR struct nxbe_clipops_s *cops,
-                             FAR struct nxbe_plane_s *plane,
-                             FAR const struct nxgl_rect_s *rect)
-{
-  FAR struct nxbe_visible_s *info = (FAR struct nxbe_visible_s *)cops;
-  info->visible = true;
-}
+FAR struct i2c_master_s *g_i2c;
+FAR struct lcd_dev_s    *g_lcddev;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxbe_visible
- *
- * Description:
- *   Return true if the point, pt, in window wnd is visible.  pt is in
- *   absolute screen coordinates
- *
+ * Name: board_lcd_initialize
  ****************************************************************************/
 
-bool nxbe_visible(FAR struct nxbe_window_s *wnd,
-                  FAR const struct nxgl_point_s *pos)
+int board_lcd_initialize(void)
 {
-  struct nxbe_visible_s info;
+  /* Initialize I2C */
 
-  /* Check if the absolute position lies within the window */
-
-  if (!nxgl_rectinside(&wnd->bounds, pos))
+  g_i2c = stm32_i2cbus_initialize(OLED_I2C_PORT);
+  if (!g_i2c)
     {
-      return false;
+      lcderr("ERROR: Failed to initialize I2C port %d\n", OLED_I2C_PORT);
+      return -ENODEV;
     }
 
-  /* If this is the top window, then the psition is visible */
+  return OK;
+}
 
-  if (!wnd->above)
+/****************************************************************************
+ * Name: board_lcd_getdev
+ ****************************************************************************/
+
+FAR struct lcd_dev_s *board_lcd_getdev(int devno)
+{
+  /* Bind the I2C port to the OLED */
+
+  g_lcddev = ssd1306_initialize(g_i2c, NULL, devno);
+  if (!g_lcddev)
     {
-      return true;
+      lcderr("ERROR: Failed to bind I2C port 1 to OLED %d: %d\n", devno);
+    }
+  else
+    {
+      lcdinfo("Bound I2C port %d to OLED %d\n", OLED_I2C_PORT, devno);
+
+      /* And turn the OLED on */
+
+      (void)g_lcddev->setpower(g_lcddev, CONFIG_LCD_MAXPOWER);
+      return g_lcddev;
     }
 
-  /* The position within the window range, but the window is not at
-   * the top.  We will have to work harder to determine if the point
-   * visible
-   */
+  return NULL;
+}
 
-  info.cops.visible  = nxbe_clipvisible;
-  info.cops.obscured = nxbe_clipnull;
-  info.visible       = false;
+/****************************************************************************
+ * Name: board_lcd_uninitialize
+ ****************************************************************************/
 
-  nxbe_clipper(wnd->above, &wnd->bounds, NX_CLIPORDER_DEFAULT,
-               &info.cops, &wnd->be->plane[0]);
-
-  return info.visible;
+void board_lcd_uninitialize(void)
+{
+  /* TO-FIX */
 }
