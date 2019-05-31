@@ -35,14 +35,14 @@
  *
  ****************************************************************************/
 
-/* The STM32F769NIH6 has 2048Kb of main FLASH memory.  This FLASH memory can
+/* The STM32F765VGT6 has 2048Kb of main FLASH memory.  This FLASH memory can
  * be accessed from either the AXIM interface at address 0x0800:0000 or from
  * the ITCM interface at address 0x0020:0000.
  *
  * Additional information, including the option bytes, is available at at
  * FLASH at address 0x1ff0:0000.
  *
- * In the STM32F769NIH6, two different boot spaces can be selected through
+ * In the STM32F765VGT6, two different boot spaces can be selected through
  * the BOOT pin and the boot base address programmed in the BOOT_ADD0 and
  * BOOT_ADD1 option bytes:
  *
@@ -55,7 +55,7 @@
  * DISCO board, the BOOT0 pin is at ground so by default, the STM32 will boot
  * to address 0x0020:0000 in ITCM FLASH.
  *
- * The STM32F769NIH6 also has 512Kb of data SRAM (in addition to ITCM SRAM).
+ * The STM32F765VGT6 also has 512Kb of data SRAM (in addition to ITCM SRAM).
  * SRAM is split up into three blocks:
  *
  *   1) 128Kb of DTCM SRM beginning at address 0x2000:0000

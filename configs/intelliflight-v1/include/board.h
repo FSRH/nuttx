@@ -248,16 +248,16 @@
 #define STM32_APB2_TIM10_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
-///* Timer Frequencies */
-//
-//#define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
-//#define BOARD_TIM2_FREQUENCY    STM32_PCLK1_FREQUENCY
-//#define BOARD_TIM3_FREQUENCY    STM32_PCLK1_FREQUENCY
-//#define BOARD_TIM4_FREQUENCY    STM32_PCLK1_FREQUENCY
-//#define BOARD_TIM5_FREQUENCY    STM32_PCLK1_FREQUENCY
-//#define BOARD_TIM6_FREQUENCY    STM32_PCLK1_FREQUENCY
-//#define BOARD_TIM7_FREQUENCY    STM32_PCLK1_FREQUENCY
-//#define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
+/* Timer Frequencies */
+
+#define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
+#define BOARD_TIM2_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM3_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM4_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM5_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM6_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM7_FREQUENCY    STM32_PCLK1_FREQUENCY
+#define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
 /* FLASH wait states
  *
@@ -274,7 +274,7 @@
 #define BOARD_FLASH_WAITSTATES 7
 
 /* LED definitions ******************************************************************/
-/* The STM32F769I-DISCO board has numerous LEDs but only one, LD1 located near the
+/* The Intelliflight-v1 board has numerous LEDs but only one, LD1 located near the
  * reset button, that can be controlled by software (LD2 is a power indicator, LD3-6
  * indicate USB status, LD7 is controlled by the ST-Link).
  *
