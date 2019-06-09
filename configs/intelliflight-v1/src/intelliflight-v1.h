@@ -120,7 +120,7 @@
 //
 //#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN0)
 #define GPIO_OUT1         	(GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-							GPIO_PORTB | GPIO_PIN2)
+							GPIO_PORTD | GPIO_PIN12)
 //#define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN2)
 
 /* Pushbutton B1, labelled "User", is connected to GPIO PA0.  A high value will be sensed when the
@@ -172,24 +172,12 @@ void weak_function stm32_spidev_initialize(void);
  *
  * Description:
  *   Called from stm32_usbinitialize very early in initialization to setup USB-related
- *   GPIO pins for the Mikroe-stm32f4 board.
+ *   GPIO pins for the intelliflight board.
  *
  ****************************************************************************************************/
 
-#ifdef CONFIG_STM32_OTGFS
-void weak_function stm32_usbinitialize(void);
-#endif
-
-/****************************************************************************************************
- * Name: arch_sporadic_initialize
- *
- * Description:
- *   This configuration has been used for evaluating the NuttX sporadic scheduler.
- *
- ****************************************************************************************************/
-
-#ifdef CONFIG_SPORADIC_INSTRUMENTATION
-void arch_sporadic_initialize(void);
+#ifdef CONFIG_STM32F7_OTGFS
+void stm32_usbinitialize(void);
 #endif
 
 /****************************************************************************

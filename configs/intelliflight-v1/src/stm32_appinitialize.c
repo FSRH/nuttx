@@ -124,16 +124,32 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#if defined(CONFIG_NUCLEO_SPI_TEST)
-  /* Create SPI interfaces */
+#ifdef CONFIG_DEV_GPIO
+	/* Initialize GPIO and register the GPIO device drivers. */
 
-  ret = stm32_spidev_bus_test();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI interfaces: %d\n", ret);
-      return ret;
-    }
+	ret = stm32_gpio_initialize();
+	if (ret < 0) {
+		syslog(LOG_ERR, "ERROR: Failed to initialize GPIO Driver: %d\n", ret);
+	}
 #endif
+
+#ifdef CONFIG_PWM
+	/* Initialize PWM and register the PWM device. */
+
+	ret = stm32_pwm_setup();
+	if (ret < 0) {
+		syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+	}
+#endif
+
+//#ifdef CONFIG_CAN
+//	/* Initialize CAN and register the CAN driver. */
+//
+//	ret = stm32_can_setup();
+//	if (ret < 0) {
+//		syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
+//	}
+//#endif
 
 //#if defined(CONFIG_MMCSD)
 //	/* Configure SDIO */
