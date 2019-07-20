@@ -53,10 +53,60 @@
 
 #include "intelliflight-v1.h"
 
-#if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
-    defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
-    defined(CONFIG_STM32F7_SPI5)
 
+#if defined(CONFIG_SPI)
+
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+#define ARRAYSIZE(x) (sizeof((x)) / sizeof((x)[0]))
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+/* Indexed by NUCLEO_SPI_BUSx_CSx */
+
+static const uint32_t g_spigpio[] =
+{
+#if defined(GPIO_SPI1_CS0)
+ GPIO_SPI1_CS0,
+#endif
+#if defined(GPIO_SPI1_CS1)
+ GPIO_SPI1_CS1,
+#endif
+#if defined(GPIO_SPI1_CS2)
+ GPIO_SPI1_CS2,
+#endif
+#if defined(GPIO_SPI1_CS3)
+ GPIO_SPI1_CS3,
+#endif
+#if defined(GPIO_SPI2_CS0)
+ GPIO_SPI2_CS0,
+#endif
+#if defined(GPIO_SPI2_CS1)
+ GPIO_SPI2_CS1,
+#endif
+#if defined(GPIO_SPI2_CS2)
+ GPIO_SPI2_CS2,
+#endif
+#if defined(GPIO_SPI2_CS3)
+ GPIO_SPI2_CS3,
+#endif
+#if defined(GPIO_SPI3_CS0)
+ GPIO_SPI3_CS0,
+#endif
+#if defined(GPIO_SPI3_CS1)
+ GPIO_SPI3_CS1,
+#endif
+#if defined(GPIO_SPI3_CS2)
+ GPIO_SPI3_CS2,
+#endif
+#if defined(GPIO_SPI3_CS3)
+ GPIO_SPI3_CS3,
+#endif
+};
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -71,6 +121,14 @@
 
 void weak_function stm32_spidev_initialize(void)
 {
+	  int i;
+
+	  /* Configure SPI CS GPIO for output */
+
+	  for (i = 0; i < ARRAYSIZE(g_spigpio); i++)
+	    {
+	      stm32_configgpio(g_spigpio[i]);
+	    }
 }
 
 /****************************************************************************

@@ -121,6 +121,8 @@
 //#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN0)
 #define GPIO_OUT1         	(GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
 							GPIO_PORTD | GPIO_PIN12)
+//#define GPIO_GYRO_INIT     	(GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+//							GPIO_PORTA | GPIO_PIN4)
 //#define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN2)
 
 /* Pushbutton B1, labelled "User", is connected to GPIO PA0.  A high value will be sensed when the
@@ -146,6 +148,14 @@
 //                            GPIO_PORTJ | GPIO_PIN1)
 //#define GPIO_SCHED_RUNNING (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
 //                            GPIO_PORTJ | GPIO_PIN0)
+
+/* SPI ***************************************************************************/
+
+#define GPIO_SPI_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                        GPIO_OUTPUT_SET)
+
+#define GPIO_SPI4_CS0   (GPIO_SPI_CS | GPIO_PORTA | GPIO_PIN3)		// AK8963N
+#define GPIO_SPI4_CS1   (GPIO_SPI_CS | GPIO_PORTA | GPIO_PIN2)		// BMP280
 
 /****************************************************************************************************
  * Public data
