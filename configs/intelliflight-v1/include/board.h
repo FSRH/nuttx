@@ -367,6 +367,23 @@
 #define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
 #define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
 
+/*
+ *
+ * SPI1 DMA:
+ *
+ *   DMAMAP_SPI1_RX_1 = Channel 3, Stream 0
+ *   DMAMAP_SPI1_RX_2 = Channel 3, Stream 2
+ *   DMAMAP_SPI1_TX_1 = Channel 3, Stream 3
+ *   DMAMAP_SPI1_TX_2 = Channel 3, Stream 5
+ *
+ *   DMAMAP_SPI1_RX = Channel 3, Stream 0
+ *   DMAMAP_SPI1_TX = Channel 3, Stream 3
+ *
+ */
+
+#define DMAMAP_SPI1_RX DMAMAP_SPI1_RX_1
+#define DMAMAP_SPI1_TX DMAMAP_SPI2_TX_1
+
 /* SPI2:
  *
  *   FUNCTION  GPIO
@@ -386,14 +403,11 @@
 
 /*
  *
- * SPI2 DMA:
+ * SPI2 DMA: already defined in chip headers!
  *   DMAMAP_SPI2_RX = Channel 0, Stream 3
  *   DMAMAP_SPI2_TX = Channel 0, Stream 4
  *
  */
-
-#define DMAMAP_SPI2_RX DMAMAP_SPI2_RX_1
-#define DMAMAP_SPI2_TX DMAMAP_SPI2_TX_1
 
 /* SPI3:
  *
@@ -439,6 +453,18 @@
 
 #define GPIO_SPI4_NSS0 (GPIO_OUTPUT|GPIO_PULLUP|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN2)
 #define GPIO_SPI4_NSS1 (GPIO_OUTPUT|GPIO_PULLUP|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN3)
+
+/*
+ * SPI4 DMA:
+ *   DMAMAP_SPI4_RX_1 = Channel 4, Stream 0
+ *   DMAMAP_SPI4_RX_2 = Channel 5, Stream 3
+ *
+ *   DMAMAP_SPI4_TX_1 = Channel 4, Stream 1
+ *   DMAMAP_SPI4_TX_2 = Channel 5, Stream 4
+ */
+
+#define DMAMAP_SPI4_RX DMAMAP_SPI4_RX_1
+#define DMAMAP_SPI4_TX DMAMAP_SPI4_TX_1
 
 /* CAN1:
  *
